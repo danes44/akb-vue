@@ -1,0 +1,154 @@
+<template>
+  <v-app>
+    <div id="app">
+      <v-app-bar app color="#ffffff" outlined elevate-on-scroll>
+        <v-app-bar-nav-icon @click.stop="sidebarMenu = !sidebarMenu" >
+          <v-icon color="primary">fa fa-bars</v-icon>
+        </v-app-bar-nav-icon>
+
+        <v-spacer></v-spacer>
+
+        <v-list style="padding: 0" dense>
+          <v-list-item class="px-2" >
+            <v-list-item-avatar class="mr-3">
+              <v-avatar size="40">
+                {{ this.accName[0].toUpperCase() }}
+              </v-avatar>
+            </v-list-item-avatar>
+
+            <v-list-item-content style="padding-top: 0; padding-bottom: 0; max-width: 140px;" class="float-right">
+              <v-list-item-title class="font-weight-bold text-truncate">{{ this.accName[0].toUpperCase() + this.accName.slice(1) }}</v-list-item-title>
+              <v-list-item-subtitle style="font-size: 10pt;" class="grey--text darken-4">{{ this.role }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+
+      </v-app-bar>
+
+      <v-navigation-drawer
+          v-model="sidebarMenu"
+          app
+          floating
+          :permanent="sidebarMenu"
+      >
+        <v-list-item class="px-9 py-9">
+          <v-list-item-content class="text-truncate" >
+            <v-img :src="require('../../assets/logoSidebar.svg')"></v-img>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list class="px-5 drawer">
+          <v-list-item v-for="item in items" :key="item.title" link :to="item.href" class="px-3 my-3 rounded-lg">
+            <v-list-item-icon class="px-3" >
+              <v-icon  >{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title id="listTab" color="#11111">{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <v-list-item @click="logout" class="px-3 rounded-lg" style="margin-top: 40%">
+            <v-list-item-icon class="px-3">
+              <v-icon color="red">mdi-logout-variant</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="font-weight-bold" style="color: #D24848">Logout</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-navigation-drawer>
+
+      <v-main>
+        <v-container class="px-4 py-0 fill-height" fluid>
+          <v-row class="fill-height">
+            <v-col>
+              <transition name="fade">
+                <router-view></router-view>
+              </transition>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-main>
+
+    </div>
+  </v-app>
+</template>
+
+<script>
+export default {
+  name: "Sidebar",
+  computed:{
+    // mini() {
+    //   return (this.$vuetify.breakpoint.smAndDown) || this.toggleMini
+    // },
+  },
+  data() {
+    return {
+      sidebarMenu: true,
+      toggleMini: false,
+      items: [
+        { title:"Dashboard", href:"/dashboard", icon:"mdi-view-dashboard-outline"},
+        { title:"Bahan", href:"/bahan", icon:"mdi-food-steak"},
+        { title:"Customer", href:"/customer", icon:"mdi-account-supervisor-outline" },
+        { title:"Karyawan", href:"/karyawan", icon:"mdi-account-group-outline" },
+        { title:"Laporan", href:"/laporan", icon:"mdi-file-chart-outline" },
+        { title:"Meja", href:"/meja", icon:"mdi-table-chair" },
+        { title:"Menu", href:"/menu", icon:"mdi-clipboard-list-outline" },
+        { title:"Order", href:"/order", icon:"mdi-order-bool-ascending" },
+        { title:"Reservasi", href:"/reservasi", icon:"mdi-book-account-outline" },
+        { title:"Role", href:"/role", icon:"mdi-account-search-outline" },
+        { title:"Stok", href:"/stok", icon:"mdi-archive-outline" },
+        { title:"Transaksi", href:"/transaksi", icon:"mdi-cash-multiple" },
+      ],
+      load: false,
+      snackbar: false,
+      error_message: '',
+      color: '',
+      accName: localStorage.getItem('nama'),
+      role: localStorage.getItem('role'),
+    }
+  },
+  methods: {
+    logout(){
+      this.snackbar=true;
+      localStorage.removeItem('token')
+      this.$router.go('/login');
+      this.load = true
+    }
+  },
+}
+</script>
+
+<style scoped>
+.v-application {
+  font-family: 'Open Sans', sans-serif !important;
+  background-color: #f2f5f7 !important;
+}
+
+.v-avatar{
+  border-radius: 0.3rem !important;
+  color:white!important;
+  background-color: #D24848;
+}
+
+.theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
+  color: #111111!important;
+}
+
+.drawer .v-list-item--active {
+  color: #ffffff!important;
+  background-color: #111111 !important;
+}
+
+#listTab{
+  font-size: 0.9rem;
+}
+
+/*.v-toolbar{*/
+/*  box-shadow: none;*/
+/*}*/
+
+
+
+
+</style>
