@@ -57,11 +57,13 @@ a:hover{
 
 ::-webkit-scrollbar {
   width: 0.3rem;
+  scrollbar-width: thin;
   -webkit-box-shadow: none !important;
 }
 
 ::-webkit-scrollbar-thumb {
   background-color: #111111;
+  scrollbar-color: #111111;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -73,8 +75,6 @@ a:hover{
   background-color: #d7d7d7;
   -webkit-box-shadow: none !important;
 }
-
-
 
 .theme--light.v-list-item:hover:before {
   background-color: #4c4c4c;

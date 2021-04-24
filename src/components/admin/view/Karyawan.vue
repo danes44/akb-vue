@@ -16,7 +16,7 @@
               class="mt-6 ml-3 mr-8 mr-md-16 mr-xl-16 rounded-lg"
           ></v-text-field>
           <v-spacer></v-spacer>
-          <v-btn color="#37A37B" @click="dialog = true" dark class="mr-3 px-4 py-5 rounded-lg" elevation="0" style="font-size: 14px">
+          <v-btn color="#37A37B" @click="dialog = true" dark class="mr-3 px-4 py-5 rounded-lg font-weight-bold" elevation="0" style="font-size: 14px">
             <v-icon class="mr-3 ">
               mdi-plus
             </v-icon>
@@ -103,167 +103,6 @@
           <v-card-title>
             <span class="headline font-weight-bold">{{ formTitle }} Data Karyawan</span>
           </v-card-title>
-<!--          <v-card-text class="pt-7">-->
-
-<!--            <v-text-field-->
-<!--                outlined-->
-<!--                rounded-->
-<!--                class="rounded-lg"-->
-<!--                v-model="form.nama_pegawai"-->
-<!--                label="Nama Karyawan"-->
-<!--                required-->
-
-<!--            >-->
-<!--              <template v-slot:prepend-inner>-->
-<!--                <v-icon class="mr-5" >mdi-account-outline</v-icon>-->
-<!--              </template>-->
-<!--            </v-text-field>-->
-
-<!--            <v-select-->
-<!--                outlined-->
-<!--                rounded-->
-<!--                class="rounded-lg"-->
-<!--                v-model="form.id_role"-->
-<!--                label="Role Karyawan"-->
-<!--                required-->
-<!--                :items="roles"-->
-<!--                item-value="id_role"-->
-<!--                item-text="role_pegawai"-->
-
-<!--            >-->
-<!--              <template v-slot:prepend-inner>-->
-<!--                <v-icon class="mr-5">mdi-account-search-outline</v-icon>-->
-<!--              </template>-->
-<!--            </v-select>-->
-
-<!--            <v-text-field-->
-<!--                outlined-->
-<!--                rounded-->
-<!--                class="rounded-lg"-->
-<!--                v-model="form.email"-->
-<!--                label="Email"-->
-<!--                required-->
-<!--                :disabled="isEmailDisabled(form.email)"-->
-<!--            >-->
-<!--              <template v-slot:prepend-inner>-->
-<!--                <v-icon class="mr-5">mdi-email-outline</v-icon>-->
-<!--              </template>-->
-<!--            </v-text-field>-->
-
-<!--            <v-row class="pt-0">-->
-<!--              <v-col class="pb-0">-->
-<!--                <v-select-->
-<!--                    outlined-->
-<!--                    rounded-->
-<!--                    class="rounded-lg"-->
-<!--                    v-model="form.status_pegawai"-->
-<!--                    label="Status"-->
-<!--                    required-->
-<!--                    :items="statusList"-->
-<!--                    item-value="key"-->
-<!--                    item-text="name"-->
-<!--                >-->
-<!--                  <template v-slot:prepend-inner>-->
-<!--                    <v-icon class="mr-5">mdi-list-status</v-icon>-->
-<!--                  </template>-->
-<!--                </v-select>-->
-<!--              </v-col>-->
-
-<!--              <v-col class="pb-0">-->
-<!--                <v-select-->
-<!--                    outlined-->
-<!--                    rounded-->
-<!--                    class="rounded-lg"-->
-<!--                    v-model="form.jenis_kelamin"-->
-<!--                    label="Jenis Kelamin"-->
-<!--                    required-->
-<!--                    :items="jenisKelaminList"-->
-<!--                    item-value="key"-->
-<!--                    item-text="name"-->
-<!--                >-->
-<!--                  <template v-slot:prepend-inner>-->
-<!--                    <v-icon class="mr-5">mdi-gender-male-female</v-icon>-->
-<!--                  </template>-->
-<!--                </v-select>-->
-<!--              </v-col>-->
-<!--            </v-row>-->
-
-<!--            <v-row>-->
-<!--              <v-col class="pt-0 pb-5">-->
-<!--                <v-menu-->
-<!--                    v-model="menu"-->
-<!--                    :close-on-content-click="false"-->
-<!--                    :nudge-right="40"-->
-<!--                    transition="scale-transition"-->
-<!--                    offset-y-->
-<!--                    min-width="auto"-->
-<!--                >-->
-<!--                  <template v-slot:activator="{ on, attrs }">-->
-<!--                    <v-text-field-->
-<!--                        outlined-->
-<!--                        rounded-->
-<!--                        hide-details-->
-<!--                        class="rounded-lg"-->
-<!--                        v-model="form.tgl_gabung"-->
-<!--                        label="Tanggal Gabung"-->
-<!--                        readonly-->
-<!--                        v-bind="attrs"-->
-<!--                        v-on="on"-->
-<!--                    >-->
-<!--                      <template v-slot:prepend-inner>-->
-<!--                        <v-icon class="mr-5">mdi-calendar</v-icon>-->
-<!--                      </template>-->
-<!--                    </v-text-field>-->
-<!--                  </template>-->
-<!--                  <v-date-picker-->
-<!--                      v-model="form.tgl_gabung"-->
-<!--                      @input="menu = false"-->
-<!--                      :max="new Date().toISOString().substr(0, 10)"-->
-<!--                      min="1950-01-01"-->
-<!--                  ></v-date-picker>-->
-<!--                </v-menu>-->
-<!--              </v-col>-->
-
-<!--              <v-col class="pt-0 pb-5">-->
-<!--                <v-menu-->
-<!--                    v-model="menu2"-->
-<!--                    :close-on-content-click="false"-->
-<!--                    :nudge-right="40"-->
-<!--                    transition="scale-transition"-->
-<!--                    offset-y-->
-<!--                    min-width="auto"-->
-<!--                >-->
-<!--                  <template v-slot:activator="{ on, attrs }">-->
-<!--                    <v-text-field-->
-<!--                        outlined-->
-<!--                        rounded-->
-<!--                        hide-details-->
-<!--                        class="rounded-lg"-->
-<!--                        :disabled="isDateDisabled(form.status_pegawai)"-->
-<!--                        v-model="form.tgl_keluar"-->
-<!--                        label="Tanggal Keluar"-->
-<!--                        prepend-inner-icon="mdi-calendar"-->
-<!--                        readonly-->
-<!--                        v-bind="attrs"-->
-<!--                        v-on="on"-->
-<!--                    >-->
-<!--                      <template v-slot:prepend-inner>-->
-<!--                        <v-icon class="mr-5">mdi-calendar</v-icon>-->
-<!--                      </template>-->
-<!--                    </v-text-field>-->
-<!--                  </template>-->
-<!--                  <v-date-picker-->
-<!--                      v-model="form.tgl_keluar"-->
-<!--                      @input="menu2 = false"-->
-<!--                      :max="new Date().toISOString().substr(0, 10)"-->
-<!--                      min="1950-01-01"-->
-<!--                  ></v-date-picker>-->
-<!--                </v-menu>-->
-<!--              </v-col>-->
-<!--            </v-row>-->
-<!--            -->
-<!--          </v-card-text>-->
-
 
           <v-card-text class="pt-7">
             <v-text-field
@@ -442,17 +281,20 @@
 
           <v-card-actions class="pr-8 pt-9 pb-5">
             <v-spacer></v-spacer>
-            <v-btn color="primary" elevation="0" @click="setForm" class="px-9 py-6">
-              Save
-            </v-btn>
-            <v-btn color="red" text @click="cancel" class="ml-3 pa-6">
+            <v-btn color="red" text @click="cancel" class="ml-3 pa-6 font-weight-bold">
               Cancel
+            </v-btn>
+            <v-btn color="primary" elevation="0" @click="setForm" class="px-9 py-6 font-weight-bold">
+              Save
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
 
-      <v-snackbar v-model="snackbar" :color="color" timeout="4000" bottom>
+      <v-snackbar multi-line v-model="snackbar" :color="color" timeout="4000" bottom>
+        <v-icon class="mr-3">
+          {{iconSnackbar}}
+        </v-icon>
         {{error_message}}
       </v-snackbar>
 
@@ -474,6 +316,21 @@
   export default {
     name: "Karyawan",
     validations: {
+      // if (!this.hasDescription) {
+      //   return {
+      //     name: {
+      //       required
+      //     }
+      //   }
+      // } else {
+      //   return {
+      //     name: {
+      //       required
+      //     },
+      //     description: {
+      //       required
+      //     }
+      // },
       form: {
         nama_pegawai: { required,  },
         email: { required, email, },
@@ -501,6 +358,7 @@
         snackbar: false,
         error_message: '',
         color: '',
+        iconSnackbar:'',
         search: null,
         dialog: false,
         dialogConfirm: false,
@@ -710,6 +568,7 @@
         }).then(response => {
           this.error_message=response.data.message;
           this.color="green"
+          this.iconSnackbar ='mdi-check-circle'
           this.snackbar=true;
           this.load = false;
           this.close();
@@ -719,6 +578,7 @@
           console.log(Object.values(error.response.data.message))
           this.error_message=Object.values(error.response.data.message).toString();
           this.color="red"
+          this.iconSnackbar ='mdi-alert-circle'
           this.snackbar=true;
           this.load = false;
         })
@@ -747,6 +607,7 @@
         }).then(response => {
           this.error_message=response.data.message;
           this.color="green"
+          this.iconSnackbar ='mdi-check-circle'
           this.snackbar=true;
           // console.log(this.nama_pegawai)
           if (this.currentEmail === this.form.email)
@@ -765,8 +626,9 @@
           }
 
         }).catch(error => {
-          this.error_message=Object.values(error.response.data.message);
+          this.error_message=Object.values(error.response.data.message).toString();
           this.color="red"
+          this.iconSnackbar ='mdi-alert-circle'
           this.snackbar=true;
           this.load = false;
         })
@@ -786,6 +648,7 @@
       },
 
       close() {
+        this.$v.$reset()
         this.dialog = false
         this.inputType = 'Tambah';
       },
@@ -799,6 +662,7 @@
       },
 
       resetForm() {
+        this.$v.$reset()
         this.form = {
           id_role: null,
           nama_pegawai: null,

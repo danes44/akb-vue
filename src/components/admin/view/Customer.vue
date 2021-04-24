@@ -16,7 +16,7 @@
               class="mt-6 ml-3 mr-8 mr-md-16 mr-xl-16 rounded-lg"
           ></v-text-field>
           <v-spacer></v-spacer>
-          <v-btn color="#37A37B" @click="dialog = true" dark class="mr-3 px-4 py-5 rounded-lg" elevation="0" style="font-size: 14px">
+          <v-btn color="#37A37B" @click="dialog = true" dark class="mr-3 px-4 py-5 rounded-lg font-weight-bold" elevation="0" style="font-size: 14px">
             <v-icon class="mr-3 ">
               mdi-plus
             </v-icon>
@@ -78,7 +78,7 @@
                     icon
                     v-bind="attrs"
                     v-on="on"
-                    @click="deleteHandler(item.id_customer)"
+                    @click="deleteHandler(item)"
                 >
                   <v-icon>
                     mdi-trash-can
@@ -158,39 +158,44 @@
 
           <v-card-actions class="pr-8 pt-9 pb-5">
             <v-spacer></v-spacer>
-            <v-btn color="primary" elevation="0" @click="setForm" class="px-9 py-6">
-              Save
-            </v-btn>
-            <v-btn color="red" text @click="cancel" class="ml-3 pa-6">
+            <v-btn color="red" text @click="cancel" class=" pa-6 font-weight-bold">
               Cancel
+            </v-btn>
+            <v-btn color="primary" elevation="0" @click="setForm" class="ml-3 px-9 py-6 font-weight-bold">
+              Save
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
 
-      <v-snackbar v-model="snackbar" :color="color" timeout="4000" bottom>
+      <v-snackbar multi-line v-model="snackbar" :color="color" timeout="4000" bottom>
+        <v-icon class="mr-3">
+          {{iconSnackbar}}
+        </v-icon>
         {{error_message}}
       </v-snackbar>
 
       <v-dialog v-model="dialogConfirm" persistent max-width="400px">
         <v-card>
-          <v-card-title>
-            <span class="headline">warning!</span>
+          <v-card-title class="pt-6">
+            <v-icon color="red" class="h3 mr-4" size="30">mdi-alert-circle</v-icon>
+            <span class="h3 font-weight-bold red--text">Warning!</span>
           </v-card-title>
           <v-card-text>
-            Anda yakin ingin menghapus produk ini?
+            Anda yakin ingin menghapus customer bernama <b>{{ form.nama_customer }}</b> ini?
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="dialogConfirm = false">
+            <v-btn color="secondary" class="mb-3 pa-6 font-weight-bold"  text @click="close">
               Cancel
             </v-btn>
-            <v-btn color="blue darken-1" text @click="deleteData">
+            <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
               Delete
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
+
     </v-container>
   </div>
 </template>
@@ -228,6 +233,7 @@ export default {
       snackbar: false,
       error_message: '',
       color: '',
+      iconSnackbar: '',
       search: null,
       dialog: false,
       dialogConfirm: false,
@@ -244,13 +250,13 @@ export default {
       customers: [],
       roles:[],
       form: {
-        nama_customer: null,
+        nama_customer: '',
         no_telp: '',
         email_customer: '',
       },
       editId: '',
       editedItem: {
-        nama_customer: null,
+        nama_customer: '',
         no_telp: '',
         email_customer: '',
       },
@@ -337,6 +343,7 @@ export default {
       }).then(response => {
         this.error_message=response.data.message;
         this.color="green"
+        this.iconSnackbar ='mdi-check-circle'
         this.snackbar=true;
         this.load = false;
         this.close();
@@ -345,6 +352,7 @@ export default {
       }).catch(error => {
         console.log(Object.values(error.response.data.message))
         this.error_message=Object.values(error.response.data.message).toString();
+        this.iconSnackbar ='mdi-alert-circle'
         this.color="red"
         this.snackbar=true;
         this.load = false;
@@ -370,6 +378,7 @@ export default {
         this.error_message=response.data.message;
         this.color="green"
         this.snackbar=true;
+        this.iconSnackbar ='mdi-check-circle'
         this.load = false;
         this.close();
         this.readData(); //mengambil data
@@ -377,8 +386,9 @@ export default {
         this.inputType = 'Tambah';
 
       }).catch(error => {
-        this.error_message=Object.values(error.response.data.message);
+        this.error_message=Object.values(error.response.data.message).toString();
         this.color="red"
+        this.iconSnackbar ='mdi-alert-circle'
         this.snackbar=true;
         this.load = false;
       })
@@ -398,6 +408,7 @@ export default {
         this.error_message=response.data.message;
         this.color="green"
         this.snackbar=true;
+        this.iconSnackbar ='mdi-check-circle'
         this.load = false;
         this.close();
         this.readData(); //mengambil data
@@ -407,6 +418,8 @@ export default {
       }).catch(error => {
         this.error_message=error.response.data.message;
         this.color="red"
+        this.iconSnackbar ='mdi-alert-circle'
+        this.form.nama_customer = null //reset form.nama_customer
         this.snackbar=true;
         this.load = false;
       })
@@ -421,14 +434,18 @@ export default {
       this.dialog = true;
     },
 
-    deleteHandler(id){
-      this.deleteId = id;
+    deleteHandler(item){
+      this.deleteId = item.id_customer;
+      this.form.nama_customer= item.nama_customer
       this.dialogConfirm = true;
     },
 
     close() {
+      this.$v.$reset()
+      this.dialogConfirm = false
       this.dialog = false
       this.inputType = 'Tambah';
+      this.form.nama_customer = null //reset form.nama_customer
     },
 
     cancel() {
@@ -437,11 +454,13 @@ export default {
       this.readData();
       this.dialog = false;
       this.inputType = 'Tambah';
+      this.form.nama_customer = null //reset form.nama_customer
     },
 
     resetForm() {
+      this.$v.$reset()
       this.form = {
-        nama_customer: null,
+        nama_customer: '',
         no_telp: '',
         email_customer: '',
       };

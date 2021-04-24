@@ -3,7 +3,7 @@
     <div id="app">
       <v-app-bar app color="#ffffff" outlined elevate-on-scroll>
         <v-app-bar-nav-icon @click.stop="sidebarMenu = !sidebarMenu" >
-          <v-icon color="primary">fa fa-bars</v-icon>
+          <v-img :src="require('../../assets/hamburgerbar2.svg')" max-width="30px"></v-img>
         </v-app-bar-nav-icon>
 
         <v-spacer></v-spacer>
@@ -18,7 +18,7 @@
 
             <v-list-item-content style="padding-top: 0; padding-bottom: 0; max-width: 140px;" class="float-right">
               <v-list-item-title class="font-weight-bold text-truncate">{{ this.accName[0].toUpperCase() + this.accName.slice(1) }}</v-list-item-title>
-              <v-list-item-subtitle style="font-size: 10pt;" class="grey--text darken-4">{{ this.role }}</v-list-item-subtitle>
+              <v-list-item-subtitle style="font-size: 10pt;" class="grey--text darken-4">{{ titleCase(this.role) }}</v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -93,12 +93,12 @@ export default {
         { title:"Karyawan", href:"/karyawan", icon:"mdi-account-group-outline" },
         { title:"Laporan", href:"/laporan", icon:"mdi-file-chart-outline" },
         { title:"Meja", href:"/meja", icon:"mdi-table-chair" },
-        { title:"Menu", href:"/menu", icon:"mdi-clipboard-list-outline" },
+        { title:"Menu", href:"/menu", icon:"mdi-room-service-outline" },
         { title:"Order", href:"/order", icon:"mdi-order-bool-ascending" },
         { title:"Reservasi", href:"/reservasi", icon:"mdi-book-account-outline" },
         { title:"Role", href:"/role", icon:"mdi-account-search-outline" },
         { title:"Stok", href:"/stok", icon:"mdi-archive-outline" },
-        { title:"Transaksi", href:"/transaksi", icon:"mdi-cash-multiple" },
+        { title:"Transaksi", href:"/transaksi", icon:"mdi-cart-outline" },
       ],
       load: false,
       snackbar: false,
@@ -109,6 +109,17 @@ export default {
     }
   },
   methods: {
+    // function buat uppercase each word
+    titleCase(str) {
+      var splitStr = str.toLowerCase().split(' ');
+      for (var i = 0; i < splitStr.length; i++) {
+        // You do not need to check if i is larger than splitStr length, as your for does that for you
+        // Assign it back to the array
+        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+      }
+      // Directly return the joined string
+      return splitStr.join(' ');
+    },
     logout(){
       this.snackbar=true;
       localStorage.removeItem('token')
