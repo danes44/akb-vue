@@ -7,7 +7,7 @@
           <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
-              label="Search"
+              label="Search by ID & Nama"
               filled
               rounded
               single-line
@@ -25,7 +25,7 @@
 
         </v-card-title>
 
-        <v-data-table :headers="headers" :items="karyawans" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." striped>
+        <v-data-table :headers="headers" :items="karyawans" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." sort-by="id_pegawai">
           <template v-slot:item.nama_pegawai="{ item }">
             {{ titleCase(item.nama_pegawai) }}
           </template>
@@ -39,8 +39,20 @@
             </span>
           </template>
 
+          <template v-slot:item.email="{ item }">
+            <span class="truncate">
+              {{item.email}}
+            </span>
+          </template>
+
           <template v-slot:item.jenis_kelamin="{ item }">
             {{ titleCase(item.jenis_kelamin) }}
+          </template>
+
+          <template v-slot:item.tgl_gabung="{ item }">
+            <span>
+              {{ moment(item.tgl_gabung).format("DD-MM-YYYY") }}
+            </span>
           </template>
 
           <template v-slot:item.tgl_keluar="{ item }">
@@ -48,7 +60,7 @@
               -
             </span>
             <span v-else>
-              {{ item.tgl_keluar }}
+              {{ moment(item.tgl_keluar).format("DD-MM-YYYY") }}
             </span>
           </template>
 
@@ -93,6 +105,26 @@
               <span>Edit Data</span>
             </v-tooltip>
 
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    class="mr-2"
+                    rounded
+                    color="orange darken-3"
+                    x-small
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="changePasswordHandler(item)"
+                >
+                  <v-icon>
+                    mdi-lock-reset
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Change Password</span>
+            </v-tooltip>
+
           </template>
 
         </v-data-table>
@@ -121,24 +153,46 @@
               </template>
             </v-text-field>
 
-            <v-select
-                outlined
-                rounded
-                class="rounded-lg"
-                v-model="form.id_role"
-                label="Role Karyawan"
-                required
-                :items="roles"
-                item-value="id_role"
-                item-text="role_pegawai"
-                :error-messages="roleErrors"
-                @input="$v.form.id_role.$touch()"
-                @blur="$v.form.id_role.$touch()"
-            >
-              <template v-slot:prepend-inner>
-                <v-icon class="mr-5">mdi-account-search-outline</v-icon>
-              </template>
-            </v-select>
+            <v-row class="pt-0">
+              <v-col class="">
+                <v-text-field
+                    outlined
+                    rounded
+                    class="rounded-lg"
+                    v-model="form.no_telp_pegawai"
+                    label="No Telpon"
+                    required
+                    :error-messages="noTelpErrors"
+                    @input="$v.form.no_telp_pegawai.$touch()"
+                    @blur="$v.form.no_telp_pegawai.$touch()"
+                >
+                  <template v-slot:prepend-inner>
+                    <v-icon class="mr-5">mdi-phone-outline</v-icon>
+                  </template>
+                </v-text-field>
+              </v-col>
+
+              <v-col class="">
+                <v-select
+                    outlined
+                    rounded
+                    class="rounded-lg"
+                    v-model="form.id_role"
+                    label="Role Karyawan"
+                    required
+                    :items="roles"
+                    item-value="id_role"
+                    item-text="role_pegawai"
+                    :error-messages="roleErrors"
+                    @input="$v.form.id_role.$touch()"
+                    @blur="$v.form.id_role.$touch()"
+                >
+                  <template v-slot:prepend-inner>
+                    <v-icon class="mr-5">mdi-account-search-outline</v-icon>
+                  </template>
+                </v-select>
+              </v-col>
+            </v-row>
 
             <v-text-field
                 outlined
@@ -154,6 +208,40 @@
             >
               <template v-slot:prepend-inner>
                 <v-icon class="mr-5">mdi-email-outline</v-icon>
+              </template>
+            </v-text-field>
+
+<!--            <v-text-field-->
+<!--                v-if="inputType==='Tambah'"-->
+<!--                outlined-->
+<!--                rounded-->
+<!--                class="rounded-lg"-->
+<!--                v-model="form.password"-->
+<!--                label="Password"-->
+<!--                type="password"-->
+<!--                required-->
+<!--                :error-messages="passwordErrors"-->
+<!--                @input="$v.form.password.$touch()"-->
+<!--                @blur="$v.form.password.$touch()"-->
+<!--            >-->
+<!--              <template v-slot:prepend-inner>-->
+<!--                <v-icon class="mr-5">mdi-email-outline</v-icon>-->
+<!--              </template>-->
+<!--            </v-text-field>-->
+            <v-text-field
+                v-if="inputType==='Tambah'"
+                outlined
+                rounded
+                class="rounded-lg"
+                v-model="form.password"
+                label="Password"
+                type="password"
+                required
+                @input="$v.form.password.$touch()"
+                @blur="$v.form.password.$touch()"
+            >
+              <template v-slot:prepend-inner>
+                <v-icon class="mr-5">mdi-lock-outline</v-icon>
               </template>
             </v-text-field>
 
@@ -262,6 +350,7 @@
                         readonly
                         v-bind="attrs"
                         v-on="on"
+                        clearable
                     >
                       <template v-slot:prepend-inner>
                         <v-icon class="mr-5">mdi-calendar</v-icon>
@@ -272,7 +361,7 @@
                       v-model="form.tgl_keluar"
                       @input="menu2 = false"
                       :max="new Date().toISOString().substr(0, 10)"
-                      min="1950-01-01"
+                      :min="form.tgl_gabung"
                   ></v-date-picker>
                 </v-menu>
               </v-col>
@@ -281,7 +370,7 @@
 
           <v-card-actions class="pr-8 pt-9 pb-5">
             <v-spacer></v-spacer>
-            <v-btn color="red" text @click="cancel" class="ml-3 pa-6 font-weight-bold">
+            <v-btn color="grey darken-1" text @click="cancel" class="ml-3 pa-6 font-weight-bold">
               Cancel
             </v-btn>
             <v-btn color="primary" elevation="0" @click="setForm" class="px-9 py-6 font-weight-bold">
@@ -291,11 +380,82 @@
         </v-card>
       </v-dialog>
 
-      <v-snackbar multi-line v-model="snackbar" :color="color" timeout="4000" bottom>
-        <v-icon class="mr-3">
+      <v-dialog v-model="dialogUpdatePassword" persistent max-width="600px">
+        <v-card class="px-5 py-5">
+          <v-card-title>
+            <span class="headline font-weight-bold">{{ formTitle }} Karyawan</span>
+          </v-card-title>
+
+          <v-card-text class="pt-7">
+            <v-text-field
+                outlined
+                rounded
+                class="rounded-lg"
+                v-model="form.newPassword"
+                label="Password Baru"
+                required
+            >
+              <template v-slot:prepend-inner>
+                <v-icon class="mr-5" >mdi-lock-outline</v-icon>
+              </template>
+            </v-text-field>
+
+            <v-text-field
+                outlined
+                rounded
+                class="rounded-lg"
+                v-model="form.confirmPassword"
+                label="Confirm Password"
+                required
+            >
+              <template v-slot:prepend-inner>
+                <v-icon class="mr-5" >mdi-lock-outline</v-icon>
+              </template>
+            </v-text-field>
+          </v-card-text>
+
+
+          <v-card-actions class="pr-8 pt-9 pb-5">
+            <v-spacer></v-spacer>
+            <v-btn color="grey darken-1" text @click="cancel" class="ml-3 pa-6 font-weight-bold">
+              Cancel
+            </v-btn>
+            <v-btn color="primary" elevation="0" @click="updatePassword" class="px-9 py-6 font-weight-bold">
+              Save
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+<!--      snackbar section-->
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+        <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
-        {{error_message}}
+        <span class="font-weight-bold" style="font-size: 1rem">Error</span>
+        <ul class="pt-3">
+          <li v-for="item in error_message" :key="item">
+            {{ item.toString() }}
+          </li>
+        </ul>
+      </v-snackbar>
+
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
+        <v-icon class="mr-3" :color="color">
+          {{iconSnackbar}}
+        </v-icon>
+        <span class="font-weight-bold">{{error_message}}</span>
+        <!--        <template v-slot:action="{ attrs }">-->
+        <!--          <v-btn-->
+        <!--              color="grey"-->
+        <!--              text-->
+        <!--              icon-->
+        <!--              v-bind="attrs"-->
+        <!--              @click="snackbar = false"-->
+        <!--          >-->
+        <!--            <v-icon>mdi-close-circle-outline</v-icon>-->
+        <!--          </v-btn>-->
+        <!--        </template>-->
       </v-snackbar>
 
     </v-container>
@@ -303,51 +463,97 @@
 </template>
 
 <script>
+  import moment from "moment"; //library buat ganti format waktu/tanggal
   import {
-    email,
+    email, maxLength, minLength, numeric,
     // maxLength,
     // minLength,
     // numeric,
     required,
     // requiredIf,
+    // requiredUnless,
     // sameAs
   } from "vuelidate/lib/validators";
 
   export default {
     name: "Karyawan",
+    // validations: {
+    //   form: {
+    //     nama_pegawai: { required,  },
+    //     email: { required, email, },
+    //     jenis_kelamin: { required },
+    //     id_role: { required },
+    //     status_pegawai: {required},
+    //     password: { required : requiredUnless('isPasswordRequired'), minLength: minLength(8)},
+    //     tgl_gabung: { required },
+    //     tgl_keluar: { required : requiredUnless('isDateRequired')},
+    //     confirmPassword: { required : requiredUnless('isPasswordRequired'), minLength: minLength(8), sameAs: sameAs('password')}
+    //
+    //   }
+    // },
     validations: {
-      // if (!this.hasDescription) {
-      //   return {
-      //     name: {
-      //       required
-      //     }
-      //   }
-      // } else {
-      //   return {
-      //     name: {
-      //       required
-      //     },
-      //     description: {
-      //       required
-      //     }
-      // },
       form: {
         nama_pegawai: { required,  },
         email: { required, email, },
-        // no_telp: { required, numeric, minLength: minLength(10), maxLength: maxLength(15) },
         jenis_kelamin: { required },
         id_role: { required },
         status_pegawai: {required},
         // password: { required, minLength: minLength(8)},
         tgl_gabung: { required },
-        // tgl_keluar: { required: requiredIf(!(this.form.status_pegawai !== null && this.form.status_pegawai === 'non aktif'))},
-        // confirmPassword: { required, minLength: minLength(8), sameAs: sameAs('password')}
+        no_telp_pegawai: { required, numeric, minLength: minLength(10), maxLength: maxLength(15) },
+        // tgl_keluar: { required : requiredIf('isDateRequired')},
+        // newPassword: { required : requiredIf('isPasswordRequired'), minLength: minLength(8), }
+        // confirmPassword: { required : requiredIf('isPasswordRequired'), minLength: minLength(8), sameAs: sameAs('newPassword')}
 
       }
     },
+    // validations() {
+    //   if ( this.inputType === 'Ubah Password') {
+    //     if(this.is_active){
+    //       return {
+    //         nama_pegawai: { required,  },
+    //         email: { required, email, },
+    //         jenis_kelamin: { required },
+    //         id_role: { required },
+    //         status_pegawai: {required},
+    //         password: { required, minLength: minLength(8)},
+    //         tgl_gabung: { required },
+    //         tgl_keluar: { required },
+    //         // confirmPassword: { required, minLength: minLength(8), sameAs: sameAs('password')}
+    //       }
+    //     }
+    //     else{
+    //       return {
+    //         nama_pegawai: { required,  },
+    //         email: { required, email, },
+    //         jenis_kelamin: { required },
+    //         id_role: { required },
+    //         status_pegawai: {required},
+    //         password: { required, minLength: minLength(8)},
+    //         tgl_gabung: { required },
+    //         // tgl_keluar: { required },
+    //         // confirmPassword: { required, minLength: minLength(8), sameAs: sameAs('password')}
+    //       }
+    //     }
+    //   } else {
+    //     return {
+    //       // nama_pegawai: {required,},
+    //       // email: {required, email,},
+    //       // jenis_kelamin: {required},
+    //       // id_role: {required},
+    //       // status_pegawai: {required},
+    //       newPassword: {required, minLength: minLength(8)},
+    //       // tgl_gabung: {required},
+    //       // tgl_keluar: { required: requiredIf(!(this.form.status_pegawai !== null && this.form.status_pegawai === 'non aktif'))},
+    //       confirmPassword: { required, minLength: minLength(8), sameAs: sameAs('password')}
+    //     }
+    //   }
+    // },
 
     data() {
       return {
+        is_updatePassword:false,
+        is_active:false,
         currentEmail:localStorage.getItem('email'),
         menu: false,
         modal: false,
@@ -361,44 +567,50 @@
         iconSnackbar:'',
         search: null,
         dialog: false,
+        dialogUpdatePassword: false,
         dialogConfirm: false,
         headers: [
           { text: "ID", value: "id_pegawai", width:70 },
           { text: "Nama",
             align: "start",
-            value: "nama_pegawai" },
-          { text: "Role", value: "role_pegawai"},
-          { text: "Email", value: "email"},
-          { text: "Status", value: "status_pegawai", align: 'center', sortable: false, width:70},
-          { text: "Gender", value: "jenis_kelamin", sortable: false },
-          { text: "Tgl Gabung", value: "tgl_gabung" },
-          { text: "Tgl Keluar", value: "tgl_keluar" },
-          { value: 'actions', sortable: false },
+            value: "nama_pegawai", width: 100 },
+          { text: "Role", value: "role_pegawai", width: 100,filterable: false},
+          { text: "Telp.", value: "no_telp_pegawai",filterable: false, width: 70},
+          { text: "Email", value: "email",filterable: false, width: 100 },
+          { text: "Status", value: "status_pegawai", align: 'center', sortable: false,filterable: false, width:70},
+          { text: "Gender", value: "jenis_kelamin", sortable: false,filterable: false, width: 70},
+          { text: "Tgl Gabung", value: "tgl_gabung",filterable: false, width: 120  },
+          { text: "Tgl Keluar", value: "tgl_keluar",filterable: false, width: 120  },
+          { value: 'actions', sortable: false,filterable: false, width: 100 },
         ],
         karyawan: new FormData,
         karyawans: [],
         roles:[],
         form: {
           id_role: null,
-          nama_pegawai: null,
+          nama_pegawai: '',
           jenis_kelamin: null,
-          tgl_gabung: null,
-          tgl_keluar: null,
+          tgl_gabung: "",
+          tgl_keluar: "",
           status_pegawai: null,
-          email: null,
-          password: null,
+          no_telp_pegawai:'',
+          email: '',
+          password: '',
+          newPassword: '',
           confirmPassword: '',
         },
         editId: '',
         editedItem: {
           id_role: null,
-          nama_pegawai: null,
+          nama_pegawai: '',
           jenis_kelamin: null,
-          tgl_gabung: null,
-          tgl_keluar: null,
+          tgl_gabung: "",
+          tgl_keluar: "",
           status_pegawai: null,
-          email: null,
-          password: null,
+          no_telp_pegawai:'',
+          email: '',
+          password: '',
+          newPassword: '',
           confirmPassword: '',
         },
         jenisKelaminList: [
@@ -412,6 +624,12 @@
       };
     },
     computed: {
+      isPasswordRequired(){
+        return this.is_updatePassword === true;
+      },
+      isDateRequired(){
+        return this.is_active === true;
+      },
       formTitle() {
         return this.inputType
       },
@@ -435,15 +653,6 @@
         !this.$v.form.status_pegawai.required && errors.push('Status harus diisi.')
         return errors
       },
-      // no_telpErrors () {
-      //   const errors = []
-      //   if (!this.$v.editedItem.phone.$dirty) return errors
-      //   !this.$v.form.no_telp.maxLength && errors.push('Nomor telepon tidak boleh lebih 15 digit')
-      //   !this.$v.form.no_telp.minLength && errors.push('Nomor telepon tidak boleh kurang dari 10 digit.')
-      //   !this.$v.form.no_telp.numeric && errors.push('Nomor telepon tidak valid.')
-      //   !this.$v.form.no_telp.required && errors.push('Nomor telepon harus diisi.')
-      //   return errors
-      // },
       jenisKelaminErrors() {
         const errors = []
         if (!this.$v.form.jenis_kelamin.$dirty) return errors
@@ -456,23 +665,39 @@
         !this.$v.form.tgl_gabung.required && errors.push('Tanggal Bergabung harus diisi.')
         return errors
       },
-      // tglKeluarErrors() {
-      //   const errors = []
-      //   if (!this.$v.form.tgl_keluar.$dirty) return errors
-      //   !this.$v.form.tgl_keluar.required && errors.push('Date join is required.')
-      //   return errors
-      // },
       roleErrors() {
         const errors = []
         if (!this.$v.form.id_role.$dirty) return errors
         !this.$v.form.id_role.required && errors.push('Role harus diisi.')
         return errors
       },
+      noTelpErrors () {
+        const errors = []
+        if (!this.$v.form.no_telp_pegawai.$dirty) return errors
+        !this.$v.form.no_telp_pegawai.maxLength && errors.push('Nomor telepon tidak boleh lebih 15 digit')
+        !this.$v.form.no_telp_pegawai.minLength && errors.push('Nomor telepon tidak boleh kurang dari 10 digit.')
+        !this.$v.form.no_telp_pegawai.numeric && errors.push('Nomor telepon tidak valid.')
+        !this.$v.form.no_telp_pegawai.required && errors.push('Nomor telepon harus diisi')
+        return errors
+      },
+      // tglKeluarErrors() {
+      //   const errors = []
+      //   if (!this.$v.form.tgl_keluar.$dirty) return errors
+      //   !this.$v.form.tgl_keluar.required && errors.push('Date join is required.')
+      //   return errors
+      // },
       // passwordErrors () {
       //   const errors = []
       //   if (!this.$v.form.password.$dirty) return errors
-      //   !this.$v.form.password.minLength && errors.push('Password tidak boleh kurang dari 8 karakter.')
+      //   !this.$v.form.password.minLength && errors.push('Password harus lebih dari 8 karakter.')
       //   !this.$v.form.password.required && errors.push('Password harus diisi.')
+      //   return errors
+      // },
+      // newPasswordErrors () {
+      //   const errors = []
+      //   if (!this.$v.form.newPassword.$dirty) return errors
+      //   !this.$v.form.newPassword.minLength && errors.push('Password harus lebih dari 8 karakter.')
+      //   !this.$v.form.newPassword.required && errors.push('Password harus diisi.')
       //   return errors
       // },
       // confirmPasswordErrors () {
@@ -486,8 +711,10 @@
     },
 
     methods: {
+      moment,
       // function buat disable tanggal keluar kalo status karyawannya aktif
       isDateDisabled(status){
+        this.is_active=true
         return !(status !== null && status === 'non aktif');
       },
 
@@ -512,13 +739,15 @@
 
       // submit form
       setForm() {
-        this.$v.$touch()
-        console.log(this.$v)
+        // console.log(this.form.tgl_gabung)
+        // console.log(this.form.tgl_keluar)
+        // this.$v.$touch()
+        // console.log(this.$v)
         if(!this.$v.$error) {
           console.log('2')
           if (this.inputType === 'Tambah')
             this.save()
-          else
+          else if(this.inputType === 'Ubah')
             this.update()
         }
       },
@@ -554,11 +783,15 @@
         this.karyawan.append('nama_pegawai', this.form.nama_pegawai);
         this.karyawan.append('jenis_kelamin', this.form.jenis_kelamin);
         this.karyawan.append('status_pegawai', this.form.status_pegawai);
-        this.karyawan.append('tgl_masuk', this.form.tgl_gabung);
+        this.karyawan.append('tgl_gabung', this.form.tgl_gabung);
         this.karyawan.append('tgl_keluar', this.form.tgl_keluar);
+        this.karyawan.append('no_telp_pegawai', this.form.no_telp_pegawai);
         this.karyawan.append('email', this.form.email);
         this.karyawan.append('password', this.form.password);
+        console.log(this.form.password)
 
+        console.log(this.form.tgl_gabung,'1')
+        console.log(this.form.tgl_keluar,'2')
         var url = this.$api + '/pegawai/'
         this.load = true
         this.$http.post(url, this.karyawan, {
@@ -576,7 +809,7 @@
           this.resetForm();
         }).catch(error => {
           console.log(Object.values(error.response.data.message))
-          this.error_message=Object.values(error.response.data.message).toString();
+          this.error_message=error.response.data.message;
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle'
           this.snackbar=true;
@@ -593,6 +826,7 @@
           status_pegawai: this.form.status_pegawai,
           tgl_gabung: this.form.tgl_gabung,
           tgl_keluar: this.form.tgl_keluar,
+          no_telp_pegawai : this.form.no_telp_pegawai,
           email: this.form.email,
           password: this.form.password,
         }
@@ -626,7 +860,42 @@
           }
 
         }).catch(error => {
-          this.error_message=Object.values(error.response.data.message).toString();
+          this.error_message=error.response.data.message;
+          this.color="red"
+          this.iconSnackbar ='mdi-alert-circle'
+          this.snackbar=true;
+          this.load = false;
+        })
+      },
+
+      updatePassword(){
+        let newData = {
+          newPassword: this.form.newPassword,
+          confirmPassword: this.form.confirmPassword,
+        }
+        var url = this.$api + '/pegawai/' + this.editId;
+
+        this.load = true
+
+        this.$http.post(url, newData, {
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          }
+        }).then(response => {
+          this.error_message=response.data.message;
+          this.color="green"
+          this.iconSnackbar ='mdi-check-circle'
+          this.snackbar=true;
+          this.load = false;
+          this.close();
+          this.readData(); //mengambil data
+          this.resetForm();
+          this.inputType = 'Tambah';
+
+        }).catch(error => {
+          this.error_message=error.response.data.message;
+          console.log(typeof this.error_message)
+          console.log()
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle'
           this.snackbar=true;
@@ -644,12 +913,20 @@
         this.form.tgl_keluar= item.tgl_keluar
         this.form.status_pegawai= item.status_pegawai
         this.form.email= item.email
+        this.form.no_telp_pegawai = item.no_telp_pegawai
         this.dialog = true;
       },
-
+      changePasswordHandler(item){
+        this.editId = item.id_pegawai;
+        this.dialogUpdatePassword = true;
+        this.is_updatePassword=true
+        this.inputType = 'Ubah Password';
+      },
       close() {
         this.$v.$reset()
         this.dialog = false
+        this.dialogConfirm = false
+        this.dialogUpdatePassword = false
         this.inputType = 'Tambah';
       },
 
@@ -658,6 +935,8 @@
         this.resetForm();
         this.readData();
         this.dialog = false;
+        this.dialogConfirm = false
+        this.dialogUpdatePassword = false
         this.inputType = 'Tambah';
       },
 
@@ -665,13 +944,15 @@
         this.$v.$reset()
         this.form = {
           id_role: null,
-          nama_pegawai: null,
+          nama_pegawai: '',
           jenis_kelamin: null,
-          tgl_gabung: null,
-          tgl_keluar: null,
+          tgl_gabung: "",
+          tgl_keluar: "",
           status_pegawai: null,
-          email: null,
-          password: null,
+          no_telp_pegawai:'',
+          email: '',
+          password: '',
+          newPassword: '',
           confirmPassword: '',
         };
       },

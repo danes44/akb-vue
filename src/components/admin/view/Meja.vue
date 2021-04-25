@@ -44,7 +44,7 @@
                     lg="3"
                     xl="2"
                 >
-                  <v-card elevation="0" v-if="item.status_meja==='tersedia'" color="green" dark max-width="256px">
+                  <v-card elevation="0" v-if="item.status_meja==='tersedia'" color="accent" dark max-width="256px">
                     <v-card-title class="heading font-weight-bold">
                       {{ item.no_meja }}
                     </v-card-title>
@@ -154,11 +154,35 @@
 
       </v-card>
 
-      <v-snackbar multi-line v-model="snackbar" :color="color" timeout="4000" bottom>
-        <v-icon class="mr-3">
+<!--      snackbar section-->
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+        <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
-        {{error_message}}
+        <span class="font-weight-bold" style="font-size: 1rem">Error</span>
+        <ul class="pt-3">
+          <li v-for="item in error_message" :key="item">
+            {{ item.toString() }}
+          </li>
+        </ul>
+      </v-snackbar>
+
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
+        <v-icon class="mr-3" :color="color">
+          {{iconSnackbar}}
+        </v-icon>
+        <span class="font-weight-bold">{{error_message}}</span>
+        <!--        <template v-slot:action="{ attrs }">-->
+        <!--          <v-btn-->
+        <!--              color="grey"-->
+        <!--              text-->
+        <!--              icon-->
+        <!--              v-bind="attrs"-->
+        <!--              @click="snackbar = false"-->
+        <!--          >-->
+        <!--            <v-icon>mdi-close-circle-outline</v-icon>-->
+        <!--          </v-btn>-->
+        <!--        </template>-->
       </v-snackbar>
 
       <v-dialog v-model="dialogConfirm" persistent max-width="400px">
@@ -172,7 +196,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="secondary" class="mb-3 pa-6 font-weight-bold"  text @click="dialogConfirm = false">
+            <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="dialogConfirm = false">
               Cancel
             </v-btn>
             <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
@@ -303,7 +327,7 @@ export default {
         this.readData(); //mengambil data
       }).catch(error => {
         console.log(Object.values(error.response.data.message))
-        this.error_message=Object.values(error.response.data.message).toString();
+        this.error_message=error.response.data.message;
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
         this.snackbar=true;
@@ -336,7 +360,7 @@ export default {
         this.inputType = 'Tambah';
 
       }).catch(error => {
-        this.error_message=Object.values(error.response.data.message).toString();
+        this.error_message=error.response.data.message;
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
         this.snackbar=true;
@@ -366,7 +390,7 @@ export default {
         this.dialogConfirm = false;
         this.inputType = 'Tambah';
       }).catch(error => {
-        this.error_message=Object.values(error.response.data.message).toString();
+        this.error_message=error.response.data.message;
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
         this.form.status_meja = null //reset form.status_meja

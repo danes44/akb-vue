@@ -30,10 +30,16 @@
               {{ formatPrice(item.jumlah_stok) }}
             </span>
           </template>
+
           <template v-slot:item.jumlah_per_sajian="{ item }">
             <span>
               {{ formatPrice(item.jumlah_per_sajian) }} {{ item.unit }}
             </span>
+          </template>
+
+          <template v-slot:item.ketersediaan="{ item }">
+            <v-chip v-if="item.ketersediaan" color="accent" outlined>Tersedia</v-chip>
+            <v-chip v-else color="red" outlined>Tidak</v-chip>
           </template>
 
           <template v-slot:[`item.actions`]="{ item }">
@@ -168,7 +174,7 @@
 
           <v-card-actions class="pr-8 pt-9 pb-5">
             <v-spacer></v-spacer>
-            <v-btn color="red" text @click="cancel" class=" pa-6 font-weight-bold">
+            <v-btn color="grey darken-1" text @click="cancel" class=" pa-6 font-weight-bold">
               Cancel
             </v-btn>
             <v-btn color="primary" elevation="0" @click="setForm" class="ml-3 px-9 py-6 font-weight-bold">
@@ -178,11 +184,35 @@
         </v-card>
       </v-dialog>
 
-      <v-snackbar multi-line v-model="snackbar" :color="color" timeout="4000" bottom>
-        <v-icon class="mr-3">
+<!--      snackbar section -->
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+        <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
-        {{error_message}}
+        <span class="font-weight-bold" style="font-size: 1rem">Error</span>
+        <ul class="pt-3">
+          <li v-for="item in error_message" :key="item">
+            {{ item.toString() }}
+          </li>
+        </ul>
+      </v-snackbar>
+
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
+        <v-icon class="mr-3" :color="color">
+          {{iconSnackbar}}
+        </v-icon>
+        <span class="font-weight-bold">{{error_message}}</span>
+<!--        <template v-slot:action="{ attrs }">-->
+<!--          <v-btn-->
+<!--              color="grey"-->
+<!--              text-->
+<!--              icon-->
+<!--              v-bind="attrs"-->
+<!--              @click="snackbar = false"-->
+<!--          >-->
+<!--            <v-icon>mdi-close-circle-outline</v-icon>-->
+<!--          </v-btn>-->
+<!--        </template>-->
       </v-snackbar>
 
       <v-dialog v-model="dialogConfirm" persistent max-width="400px">
@@ -196,7 +226,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="secondary" class="mb-3 pa-6 font-weight-bold"  text @click="close">
+          <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="close">
             Cancel
           </v-btn>
           <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
@@ -257,23 +287,27 @@ export default {
           value: "nama_bahan" },
         { text: "Jumlah Stok", value: "jumlah_stok"},
         { text: "Serving Size", value: "jumlah_per_sajian"},
+        { text: "Tersedia", value: "ketersediaan"},
         // { text: "Unit", value: "unit", align: 'center', sortable: false, width:70},
         { value: 'actions', sortable: false },
       ],
       bahan: new FormData,
       bahans: [],
+      menus:[],
       form: {
-        nama_bahan: null,
+        nama_bahan: '',
         jumlah_stok: null,
         jumlah_per_sajian: null,
-        unit: null,
+        unit: '',
+        ketersediaan: 0,
       },
       editId: '',
       editedItem: {
-        nama_bahan: null,
+        nama_bahan: '',
         jumlah_stok: null,
         jumlah_per_sajian: null,
-        unit: null,
+        unit: '',
+        ketersediaan: 0,
       },
     };
   },
@@ -303,7 +337,7 @@ export default {
       !this.$v.form.jumlah_per_sajian.required && errors.push('Serving size harus diisi.')
       !this.$v.form.jumlah_per_sajian.numeric && errors.push('Serving size harus berupa angka.')
       // !this.$v.form.jumlah_per_sajian.minValue && errors.push('Serving size minimal 0.')
-      !this.$v.form.jumlah_per_sajian.between && errors.push('Min. 0 dan maks. sebanyak jumlah stok.')
+      // !this.$v.form.jumlah_per_sajian.between && errors.push('Min. 0 dan maks. sebanyak jumlah stok.')
       return errors
     },
     unitErrors () {
@@ -336,7 +370,7 @@ export default {
     // submit form
     setForm() {
       this.$v.$touch()
-      console.log(this.$v)
+      // console.log(this.$v)
       if(!this.$v.$error) {
         console.log('2')
         if (this.inputType === 'Tambah')
@@ -359,12 +393,29 @@ export default {
       })
     },
 
+    //read data product
+    readDataMenu() {
+      var url = this.$api + '/menu'
+      this.$http.get(url, {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      }).then(response => {
+        this.loadingData = false
+        this.menus = response.data.data
+      })
+    },
+
     //simpan data bahan
     save() {
       this.bahan.append('nama_bahan', this.form.nama_bahan);
       this.bahan.append('jumlah_stok', this.form.jumlah_stok);
       this.bahan.append('jumlah_per_sajian', this.form.jumlah_per_sajian);
       this.bahan.append('unit', this.form.unit);
+      if(this.form.jumlah_per_sajian>this.form.jumlah_stok)
+        this.bahan.append('ketersediaan', 0)
+      else
+        this.bahan.append('ketersediaan', 1)
 
       var url = this.$api + '/bahan/'
       this.load = true
@@ -374,6 +425,7 @@ export default {
         }
       }).then(response => {
         this.error_message=response.data.message;
+        console.log(this.error_message)
         this.color="green"
         this.iconSnackbar ='mdi-check-circle'
         this.snackbar=true;
@@ -383,7 +435,8 @@ export default {
         this.resetForm();
       }).catch(error => {
         console.log(Object.values(error.response.data.message))
-        this.error_message=Object.values(error.response.data.message).toString();
+        this.error_message=error.response.data.message;
+        console.log(typeof this.error_message)
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
         this.snackbar=true;
@@ -391,14 +444,16 @@ export default {
       })
     },
 
-    //ubah data karyawan
+    //ubah data bahan
     update() {
       let newData = {
         nama_bahan: this.form.nama_bahan,
         jumlah_stok: this.form.jumlah_stok,
         jumlah_per_sajian: this.form.jumlah_per_sajian,
         unit: this.form.unit,
+        ketersediaan : this.form.ketersediaan
       }
+      console.log(this.form.ketersediaan)
       var url = this.$api + '/bahan/' + this.editId;
 
       this.load = true
@@ -409,6 +464,7 @@ export default {
         }
       }).then(response => {
         this.error_message=response.data.message;
+        console.log(typeof this.error_message)
         this.color="green"
         this.iconSnackbar ='mdi-check-circle'
         this.snackbar=true;
@@ -419,9 +475,60 @@ export default {
         this.inputType = 'Tambah';
 
       }).catch(error => {
-        this.error_message=Object.values(error.response.data.message).toString();
+        this.error_message=error.response.data.message;
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
+        this.snackbar=true;
+        this.load = false;
+      })
+    },
+
+    //ubah data menu pas ganti jumlah bahan
+    updateMenu() {
+      let id_table= this.menus.find(menus => menus.id_bahan === this.form.id_bahan) //get id menu mana yang punya id_bahan yang sama
+      console.log(id_table.id_menu)
+
+      let newData = {
+        id_bahan: this.form.id_bahan,
+        nama_menu: this.form.nama_menu,
+        deskripsi: this.form.deskripsi,
+        unit: this.form.unit,
+        tipe_menu: this.form.tipe_menu,
+        harga: this.form.harga,
+        is_available: this.form.is_available,
+      }
+
+      if(id_table.jumlah_stok >= id_table.jumlah_per_sajian)
+      {
+        this.menu.append('is_available', 1);
+      }
+      else
+        this.menu.append('is_available', 0);
+
+      var url = this.$api + '/menu/' + this.editId;
+
+      this.load = true
+
+      this.$http.put(url, newData, {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      }).then(response => {
+        this.saveImage()
+        this.error_message=response.data.message;
+        this.color="green"
+        this.iconSnackbar ='mdi-check-circle-outline'
+        this.snackbar=true;
+        this.load = false;
+        this.close();
+        this.readData(); //mengambil data
+        this.resetForm();
+        this.inputType = 'Tambah';
+
+      }).catch(error => {
+        this.error_message=error.response.data.message;
+        this.color="red"
+        this.iconSnackbar ='mdi-alert-circle-outline'
         this.snackbar=true;
         this.load = false;
       })
@@ -449,7 +556,7 @@ export default {
         this.dialogConfirm = false;
         this.inputType = 'Tambah';
       }).catch(error => {
-        this.error_message=Object.values(error.response.data.message).toString();
+        this.error_message=error.response.data.message;
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
         this.form.nama_bahan = null //reset form.nama_bahan
@@ -471,6 +578,10 @@ export default {
       this.form.jumlah_stok = item.jumlah_stok
       this.form.jumlah_per_sajian = item.jumlah_per_sajian
       this.form.unit = item.unit
+      if(this.form.jumlah_per_sajian>this.form.jumlah_stok)
+        this.form.ketersediaan=0
+      else
+        this.form.ketersediaan=1
       this.dialog = true;
     },
 
@@ -494,10 +605,10 @@ export default {
     resetForm() {
       this.$v.$reset()
       this.form = {
-        nama_bahan: null,
+        nama_bahan: '',
         jumlah_stok: null,
         jumlah_per_sajian: null,
-        unit: null,
+        unit: '',
       };
     },
   },
@@ -505,6 +616,7 @@ export default {
   mounted() {
     this.loadingData = true
     this.readData()
+    this.readDataMenu()
   },
 }
 </script>

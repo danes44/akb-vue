@@ -94,13 +94,13 @@
                 @blur="$v.form.role_pegawai.$touch()"
             >
               <template v-slot:prepend-inner>
-                <v-icon class="mr-5" >mdi-food-steak</v-icon>
+                <v-icon class="mr-5" >mdi-account-search-outline</v-icon>
               </template>
             </v-text-field>
 
             <v-card-actions class="pr-8 pt-9 pb-5">
               <v-spacer></v-spacer>
-              <v-btn color="red" text @click="cancel" class=" pa-6 font-weight-bold">
+              <v-btn color="grey darken-1" text @click="cancel" class=" pa-6 font-weight-bold">
                 Cancel
               </v-btn>
               <v-btn color="primary" elevation="0" @click="setForm" class="ml-3 px-9 py-6 font-weight-bold">
@@ -111,11 +111,35 @@
         </v-card>
       </v-dialog>
 
-      <v-snackbar multi-line v-model="snackbar" :color="color" timeout="4000" bottom>
-        <v-icon class="mr-3">
+<!--      snackbar section-->
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+        <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
-        {{error_message}}
+        <span class="font-weight-bold" style="font-size: 1rem">Error</span>
+        <ul class="pt-3">
+          <li v-for="item in error_message" :key="item">
+            {{ item.toString() }}
+          </li>
+        </ul>
+      </v-snackbar>
+
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
+        <v-icon class="mr-3" :color="color">
+          {{iconSnackbar}}
+        </v-icon>
+        <span class="font-weight-bold">{{error_message}}</span>
+        <!--        <template v-slot:action="{ attrs }">-->
+        <!--          <v-btn-->
+        <!--              color="grey"-->
+        <!--              text-->
+        <!--              icon-->
+        <!--              v-bind="attrs"-->
+        <!--              @click="snackbar = false"-->
+        <!--          >-->
+        <!--            <v-icon>mdi-close-circle-outline</v-icon>-->
+        <!--          </v-btn>-->
+        <!--        </template>-->
       </v-snackbar>
 
       <v-dialog v-model="dialogConfirm" persistent max-width="400px">
@@ -129,7 +153,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="secondary" class="mb-3 pa-6 font-weight-bold"  text @click="close">
+            <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="close">
               Cancel
             </v-btn>
             <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
@@ -183,11 +207,11 @@ export default {
       role: new FormData,
       roles: [],
       form: {
-        role_pegawai: null,
+        role_pegawai: '',
       },
       editId: '',
       editedItem: {
-        role_pegawai: null,
+        role_pegawai: '',
       },
     };
   },
@@ -263,7 +287,7 @@ export default {
         this.resetForm();
       }).catch(error => {
         console.log(Object.values(error.response.data.message))
-        this.error_message=Object.values(error.response.data.message).toString();
+        this.error_message=error.response.data.message;
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
         this.snackbar=true;
@@ -296,7 +320,7 @@ export default {
         this.inputType = 'Tambah';
 
       }).catch(error => {
-        this.error_message=Object.values(error.response.data.message).toString();
+        this.error_message=error.response.data.message;
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
         this.snackbar=true;
@@ -326,7 +350,7 @@ export default {
         this.dialogConfirm = false;
         this.inputType = 'Tambah';
       }).catch(error => {
-        this.error_message=Object.values(error.response.data.message).toString();
+        this.error_message=error.response.data.message;
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
         this.form.role_pegawai = null //reset form.role_pegawai
@@ -368,7 +392,7 @@ export default {
     resetForm() {
       this.$v.$reset()
       this.form = {
-        role_pegawai: null,
+        role_pegawai: '',
       };
     },
   },

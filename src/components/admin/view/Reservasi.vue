@@ -16,11 +16,11 @@
               class="mt-6 ml-3 mr-8 mr-md-16 mr-xl-16 rounded-lg"
           ></v-text-field>
           <v-spacer></v-spacer>
-          <v-btn color="#37A37B" @click="dialog = true" dark class="mr-3 px-4 py-5 rounded-lg font-weight-bold" elevation="0" style="font-size: 14px">
+          <v-btn color="#37A37B" @click="dialogAddCustomer = true" dark class="mr-3 px-4 py-5 rounded-lg font-weight-bold" elevation="0" style="font-size: 14px">
             <v-icon class="mr-3 ">
               mdi-plus
             </v-icon>
-            Tambah Menu
+            Tambah Reservasi
           </v-btn>
 
         </v-card-title>
@@ -34,11 +34,48 @@
             <span>{{ titleCase(item.nama_pegawai) }}</span>
           </template>
 
+          <template v-slot:item.tgl_reservasi="{ item }">
+            <span>
+              {{ moment(item.tgl_reservasi).format("DD-MM-YYYY") }}
+            </span>
+          </template>
+
+          <template v-slot:item.created_at="{ item }">
+            <span>
+              {{ moment(item.created_at).format("DD-MM-YYYY, HH:mm") }} WIB
+            </span>
+          </template>
+
           <template v-slot:item.sesi="{ item }">
-            <span>{{ titleCase(item.sesi) }}</span>
+            <v-chip v-if="item.sesi==='lunch'" outlined color="orange darken-4">
+              <span>{{ titleCase(item.sesi) }}</span>
+            </v-chip>
+            <v-chip v-else outlined color="teal darken-2">
+              <span>{{ titleCase(item.sesi) }}</span>
+            </v-chip>
           </template>
 
           <template v-slot:[`item.actions`]="{ item }">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    class="mr-2"
+                    rounded
+                    color="accent"
+                    x-small
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="printHandler(item)"
+                >
+                  <v-icon>
+                    mdi-cloud-print
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Cetak QR Code</span>
+            </v-tooltip>
+
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
@@ -82,184 +119,189 @@
         </v-data-table>
       </v-card>
 
-      <div>
-<!--            <v-dialog v-model="dialog" persistent max-width="600px">-->
-<!--              <v-card class="px-5 py-5">-->
-<!--                <v-card-title>-->
-<!--                  <span class="headline font-weight-bold">{{ formTitle }} Data Menu</span>-->
-<!--                </v-card-title>-->
-<!--      -->
-<!--                <v-card-text class="pt-7">-->
-<!--                  <v-text-field-->
-<!--                      outlined-->
-<!--                      rounded-->
-<!--                      class="rounded-lg"-->
-<!--                      v-model="form.nama_menu"-->
-<!--                      label="Nama Menu"-->
-<!--                      required-->
-<!--                      :error-messages="namaErrors"-->
-<!--                      @input="$v.form.nama_menu.$touch()"-->
-<!--                      @blur="$v.form.nama_menu.$touch()"-->
-<!--                  >-->
-<!--                    <template v-slot:prepend-inner>-->
-<!--                      <v-icon class="mr-5" >mdi-room-service-outline</v-icon>-->
-<!--                    </template>-->
-<!--                  </v-text-field>-->
-<!--      -->
-<!--                  <v-row class="pt-0">-->
-<!--                    <v-col class="pb-0">-->
-<!--                      <v-select-->
-<!--                          outlined-->
-<!--                          rounded-->
-<!--                          class="rounded-lg"-->
-<!--                          v-model="form.id_bahan"-->
-<!--                          label="Nama Bahan"-->
-<!--                          required-->
-<!--                          :items="bahans"-->
-<!--                          item-value="id_bahan"-->
-<!--                          item-text="nama_bahan"-->
-<!--                          :error-messages="bahanErrors"-->
-<!--                          @input="$v.form.id_bahan.$touch()"-->
-<!--                          @blur="$v.form.id_bahan.$touch()"-->
-<!--                      >-->
-<!--                        <template v-slot:prepend-inner>-->
-<!--                          <v-icon class="mr-5">mdi-food-steak</v-icon>-->
-<!--                        </template>-->
-<!--                      </v-select>-->
-<!--                    </v-col>-->
-<!--                    <v-col>-->
-<!--                      <v-select-->
-<!--                          outlined-->
-<!--                          rounded-->
-<!--                          class="rounded-lg"-->
-<!--                          v-model="form.tipe_menu"-->
-<!--                          label="Tipe Menu"-->
-<!--                          required-->
-<!--                          :items="tipeMenuList"-->
-<!--                          item-value="key"-->
-<!--                          item-text="name"-->
-<!--                          :error-messages="tipeErrors"-->
-<!--                          @input="$v.form.tipe_menu.$touch()"-->
-<!--                          @blur="$v.form.tipe_menu.$touch()"-->
-<!--                      >-->
-<!--                        <template v-slot:prepend-inner>-->
-<!--                          <v-icon class="mr-5">mdi-menu-open</v-icon>-->
-<!--                        </template>-->
-<!--                      </v-select>-->
-<!--                    </v-col>-->
-<!--                  </v-row>-->
-<!--      -->
-<!--      -->
-<!--                  <v-textarea-->
-<!--                      outlined-->
-<!--                      rounded-->
-<!--                      class="rounded-lg"-->
-<!--                      v-model="form.deskripsi"-->
-<!--                      label="Deskripsi"-->
-<!--                      required-->
-<!--                      :error-messages="deskripsiErrors"-->
-<!--                      @input="$v.form.deskripsi.$touch()"-->
-<!--                      @blur="$v.form.deskripsi.$touch()"-->
-<!--                  >-->
-<!--                    <template v-slot:prepend-inner>-->
-<!--                      <v-icon class="mr-5">mdi-text-subject</v-icon>-->
-<!--                    </template>-->
-<!--                  </v-textarea>-->
-<!--      -->
-<!--                  <v-row class="pt-0">-->
-<!--                    <v-col class="pb-0">-->
-<!--                      <v-text-field-->
-<!--                          outlined-->
-<!--                          rounded-->
-<!--                          class="rounded-lg"-->
-<!--                          v-model="form.unit"-->
-<!--                          label="Unit"-->
-<!--                          required-->
-<!--                          :error-messages="unitErrors"-->
-<!--                          @input="$v.form.unit.$touch()"-->
-<!--                          @blur="$v.form.unit.$touch()"-->
-<!--                      >-->
-<!--                        <template v-slot:prepend-inner>-->
-<!--                          <v-icon class="mr-5">mdi-scale-balance</v-icon>-->
-<!--                        </template>-->
-<!--                      </v-text-field>-->
-<!--                    </v-col>-->
-<!--      -->
-<!--                    <v-col class="pb-0">-->
-<!--                      <v-text-field-->
-<!--                          outlined-->
-<!--                          rounded-->
-<!--                          class="rounded-lg"-->
-<!--                          v-model="form.harga"-->
-<!--                          label="Harga"-->
-<!--                          required-->
-<!--                          type="number"-->
-<!--                          :error-messages="hargaErrors"-->
-<!--                          @input="$v.form.harga.$touch()"-->
-<!--                          @blur="$v.form.harga.$touch()"-->
-<!--                      >-->
-<!--                        <template v-slot:prepend-inner>-->
-<!--                          <v-icon class="mr-5">mdi-cash</v-icon>-->
-<!--                        </template>-->
-<!--                      </v-text-field>-->
-<!--                    </v-col>-->
-<!--                  </v-row>-->
-<!--      -->
-<!--                  <v-row class="pt-0 mt-0">-->
-<!--                    <v-col>-->
-<!--                      <v-file-input-->
-<!--                          outlined-->
-<!--                          rounded-->
-<!--                          truncate-length="12"-->
-<!--                          class="rounded-lg"-->
-<!--                          v-model="form.str_gambar"-->
-<!--                          label="Gambar"-->
-<!--                          required-->
-<!--                          prepend-icon=""-->
-<!--                          accept="image/png, image/jpeg, image/bmp"-->
-<!--                          :error-messages="gambarErrors"-->
-<!--                          @input="$v.form.str_gambar.$touch()"-->
-<!--                          @blur="$v.form.str_gambar.$touch()"-->
-<!--                      >-->
-<!--                        <template v-slot:prepend-inner>-->
-<!--                          <v-icon class="mr-5">mdi-cash</v-icon>-->
-<!--                        </template>-->
-<!--                      </v-file-input>-->
-<!--                    </v-col>-->
-<!--                  </v-row>-->
-<!--                </v-card-text>-->
-<!--      -->
-<!--                <v-card-actions class="pr-8 pt-9 pb-5">-->
-<!--                  <v-spacer></v-spacer>-->
-<!--                  <v-btn color="red" text @click="cancel" class="ml-3 pa-6 font-weight-bold">-->
-<!--                    Cancel-->
-<!--                  </v-btn>-->
-<!--                  <v-btn color="primary" elevation="0" @click="setForm" class="px-9 py-6 font-weight-bold">-->
-<!--                    Save-->
-<!--                  </v-btn>-->
-<!--                </v-card-actions>-->
-<!--              </v-card>-->
-<!--            </v-dialog>-->
-      </div>
 
-      <v-snackbar multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-dialog v-model="dialog" persistent max-width="600px">
+        <v-card class="px-5 py-5">
+          <v-card-title>
+            <span class="headline font-weight-bold">{{ formTitle }} Data Menu</span>
+          </v-card-title>
+
+          <v-card-text class="pt-7">
+            <v-select
+                outlined
+                rounded
+                class="rounded-lg"
+                v-model="form.id_customer"
+                label="Nama Customer"
+                required
+                :items="customers"
+                item-value="id_customer"
+                item-text="nama_customer"
+                :error-messages="customerErrors"
+                @input="$v.form.id_customer.$touch()"
+                @blur="$v.form.id_customer.$touch()"
+            >
+              <template v-slot:prepend-inner>
+                <v-icon class="mr-5" >mdi-account-supervisor-outline</v-icon>
+              </template>
+            </v-select>
+
+            <v-row class="pt-0">
+              <v-col class="pb-0">
+                <v-select
+                    outlined
+                    rounded
+                    class="rounded-lg"
+                    v-model="form.id_waiter"
+                    label="Nama Waiter"
+                    required
+                    :items="pegawais"
+                    item-value="id_pegawai"
+                    item-text="nama_pegawai"
+                    :error-messages="pegawaiErrors"
+                    @input="$v.form.id_waiter.$touch()"
+                    @blur="$v.form.id_waiter.$touch()"
+                >
+                  <template v-slot:prepend-inner>
+                    <v-icon class="mr-5">mdi-account-group-outline</v-icon>
+                  </template>
+                </v-select>
+              </v-col>
+              <v-col class="pb-0">
+                <v-select
+                    outlined
+                    rounded
+                    class="rounded-lg"
+                    v-model="form.no_meja"
+                    label="No. Meja"
+                    required
+                    :items="mejaTersedia"
+                    item-value="no_meja"
+                    item-text="no_meja"
+                    :error-messages="mejaErrors"
+                    @input="$v.form.no_meja.$touch()"
+                    @blur="$v.form.no_meja.$touch()"
+                >
+                  <template v-slot:prepend-inner>
+                    <v-icon class="mr-5">mdi-table-chair</v-icon>
+                  </template>
+                </v-select>
+              </v-col>
+            </v-row>
+
+            <v-row class="pt-0 mt-0">
+              <v-col class="pb-0">
+                <v-menu
+                    v-model="menu"
+                    :close-on-content-click="false"
+                    :nudge-right="40"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                        outlined
+                        rounded
+                        hide-details
+                        class="rounded-lg"
+                        v-model="form.tgl_reservasi"
+                        label="Tanggal Reservasi"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        :error-messages="tanggalErrors"
+                        @input="$v.form.tgl_reservasi.$touch()"
+                        @blur="$v.form.tgl_reservasi.$touch()"
+                    >
+                      <template v-slot:prepend-inner>
+                        <v-icon class="mr-5">mdi-calendar</v-icon>
+                      </template>
+                    </v-text-field>
+                  </template>
+                  <v-date-picker
+                      v-if="inputType==='Tambah'"
+                      v-model="form.tgl_reservasi"
+                      @input="menu = false"
+                      :min="new Date().toISOString().substr(0, 10)"
+                  ></v-date-picker>
+                  <v-date-picker
+                      v-else-if="inputType==='Ubah'"
+                      v-model="form.tgl_reservasi"
+                      @input="menu = false"
+                      :min="this.tgl_pesan"
+                  ></v-date-picker>
+                </v-menu>
+              </v-col>
+
+              <v-col class="pb-0">
+                <v-select
+                    outlined
+                    rounded
+                    class="rounded-lg"
+                    v-model="form.sesi"
+                    label="Sesi"
+                    required
+                    :items="sesiList"
+                    item-value="key"
+                    item-text="name"
+                    :error-messages="sesiErrors"
+                    @input="$v.form.sesi.$touch()"
+                    @blur="$v.form.sesi.$touch()"
+                >
+                  <template v-slot:prepend-inner>
+                    <v-icon class="mr-5">mdi-clock-time-eight-outline</v-icon>
+                  </template>
+                </v-select>
+              </v-col>
+            </v-row>
+
+          </v-card-text>
+
+          <v-card-actions class="pr-8 pt-9 pb-5">
+            <v-spacer></v-spacer>
+            <v-btn color="grey darken-1" text @click="cancel" class="ml-3 pa-6 font-weight-bold">
+              Cancel
+            </v-btn>
+            <v-btn color="primary" elevation="0" @click="setForm" class="px-9 py-6 font-weight-bold">
+              Save
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+<!--      snackbar section-->
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+        <v-icon class="mr-3" :color="color">
+          {{iconSnackbar}}
+        </v-icon>
+        <span class="font-weight-bold" style="font-size: 1rem">Error</span>
+        <ul class="pt-3">
+          <li v-for="item in error_message" :key="item">
+            {{ item.toString() }}
+          </li>
+        </ul>
+      </v-snackbar>
+
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
         <span class="font-weight-bold">{{error_message}}</span>
-        <template v-slot:action="{ attrs }">
-          <v-btn
-              color="grey"
-              text
-              icon
-              v-bind="attrs"
-              @click="snackbar = false"
-          >
-            <v-icon>mdi-close-circle-outline</v-icon>
-          </v-btn>
-        </template>
+        <!--        <template v-slot:action="{ attrs }">-->
+        <!--          <v-btn-->
+        <!--              color="grey"-->
+        <!--              text-->
+        <!--              icon-->
+        <!--              v-bind="attrs"-->
+        <!--              @click="snackbar = false"-->
+        <!--          >-->
+        <!--            <v-icon>mdi-close-circle-outline</v-icon>-->
+        <!--          </v-btn>-->
+        <!--        </template>-->
       </v-snackbar>
 
+<!--      dialog confirm hapus-->
       <v-dialog v-model="dialogConfirm" persistent max-width="400px">
         <v-card>
           <v-card-title class="pt-6">
@@ -271,7 +313,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="secondary" class="mb-3 pa-6 font-weight-bold"  text @click="close">
+            <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="close">
               Cancel
             </v-btn>
             <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
@@ -281,11 +323,85 @@
         </v-card>
       </v-dialog>
 
+<!--      dialog print qrcode-->
+      <v-dialog v-model="dialogPrint" persistent max-width="400px">
+        <v-card>
+          <v-container>
+
+            <div id="testHtml">
+              <v-card-title class="pt-6 text-center align-content-center align-center">
+                <v-img :src="require('../../../assets/logoSidebar.svg')" max-width="180" class="mx-auto"></v-img>
+              </v-card-title>
+              <v-card-text class="px-12 pt-5 text-center">
+                <div id="qr_code">
+                  <QRCanvas :options="options" />
+                </div>
+              </v-card-text>
+              <v-card-text class="px-12 pt-5 text-center">
+                <v-row class="mx-auto">
+                  <span
+                    class="body-1 text--primary font-weight-bold mx-auto"
+                    style="font-family: 'Open Sans', sans-serif !important;"
+                  >
+                    Printed {{ moment(new Date()).format('MMM DD, YYYY HH:mm') }} WIB
+                  </span>
+                </v-row>
+                <v-row class="mx-auto pt-3">
+                  <span
+                      class="text--primary mx-auto"
+                      style="font-family: 'Open Sans', sans-serif !important;"
+                  >
+                    Printed by {{ this.printedBy }}
+                  </span>
+                </v-row>
+              </v-card-text>
+            </div>
+            <v-card-actions class="pt-10">
+              <v-btn color="secondary" class="mx-3 mb-3 px-5 py-3 font-weight-bold" elevation="0" dark text @click="printPdf">
+                Print PDF
+              </v-btn>
+              <v-spacer></v-spacer>
+              <v-btn color="grey darken-1" class="mx-3 mb-3 px-5 py-3 font-weight-bold" elevation="0" dark text @click="close">
+                Close
+              </v-btn>
+            </v-card-actions>
+
+
+          </v-container>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="dialogAddCustomer" persistent max-width="400px">
+        <v-card>
+          <v-card-title class="pt-6">
+            <v-icon color="orange darken-2" class="h3 mr-4" size="30">mdi-alert-circle</v-icon>
+            <span class="h3 font-weight-bold orange--text">Warning!</span>
+          </v-card-title>
+          <v-card-text>
+            Apakah customer <b>sudah terdaftar?</b> Jika belum silakan membuat data customer.
+          </v-card-text>
+          <v-card-actions class="pt-4">
+            <v-spacer></v-spacer>
+            <v-btn color="grey darken-2" class="mb-3 pa-6 font-weight-bold" text @click="addCustomerFirst">
+              Belum
+            </v-btn>
+            <v-btn color="primary" class="mx-3 mb-3 px-6 py-6 font-weight-bold" elevation="0" dark @click="openDialog" >
+              Sudah
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
     </v-container>
   </div>
 </template>
 
+
 <script>
+  import { jsPDF } from "jspdf";
+  import html2canvas from "html2canvas"
+  import { QRCanvas } from 'qrcanvas-vue' //import library buat qr code
+  import moment from "moment"; //library buat ganti format waktu/tanggal
   import {
     // email, maxLength, minLength,
     // maxLength,
@@ -297,10 +413,14 @@
   } from "vuelidate/lib/validators";
 
   export default {
+    //import component QR
+    components: {
+      QRCanvas,
+    },
     name: "Menu",
     validations: {
       form: {
-        id_pegawai: {required},
+        id_waiter: {required},
         id_customer: {required},
         no_meja: {required},
         tgl_reservasi: {required},
@@ -313,6 +433,12 @@
         // rulesInput: [
         //   value => !value || value.size < 5000000 || 'Harus dalam format .jpg, .png, atau .bmp dibawah 5 MB',
         // ],
+        idMejaDelete: null,
+        printedBy:'',
+        qrText: '',
+        menu: false,
+        modal: false,
+        menu2: false,
         loadingData: 'false',
         inputType: 'Tambah',
         load: false,
@@ -322,30 +448,35 @@
         iconSnackbar:'',
         search: null,
         dialog: false,
+        dialogPrint : false,
         dialogConfirm: false,
+        dialogAddCustomer: false,
         headers: [
           { text: "ID", value: "id_reservasi", width:70 },
           { text: "Nama Customer",
             align: "start",
             value: "nama_customer",width: 150 },
-          { text: "No. Meja", value: "no_meja", sortable: false,width: 70},
-          { text: "Tgl Reservasi", value: "tgl_reservasi",width: 150},
-          { text: "Tgl Pesan", value: "created_at",width: 150},
+          { text: "No. Meja", value: "no_meja", sortable: false,width: 80},
+          { text: "Tgl Reservasi", value: "tgl_reservasi",width: 120},
           { text: "Sesi", value:"sesi",width: 80 },
-          { text: "Waiter", value: "nama_pegawai",width: 100, sortable: false,  },
+          { text: "Tgl Pesan", value: "created_at",width: 170},
+          { text: "Waiter", value: "nama_pegawai",width: 150, sortable: false,  },
           { value: 'actions', sortable: false, width:100 },
         ],
         reservasi: new FormData,
+        meja: new FormData,
         reservasis: [],
         customers:[],
         mejas:[],
+        mejaTersedia:[],
         pegawais:[],
-        tipeMenuList: [
+        tgl_pesan:null,
+        sesiList: [
           { key: 'lunch', name: 'Lunch'},
           { key: 'dinner', name: 'Dinner'},
         ],
         form: {
-          id_pegawai: null,
+          id_waiter: null,
           id_customer: null,
           no_meja: null,
           tgl_reservasi: null,
@@ -353,7 +484,7 @@
         },
         editId: '',
         editedItem: {
-          id_pegawai: null,
+          id_waiter: null,
           id_customer: null,
           no_meja: null,
           tgl_reservasi: null,
@@ -362,6 +493,13 @@
       };
     },
     computed: {
+      //method buat settingan generate QR code
+      options() {
+        return {
+          cellSize: 4,
+          data: this.qrText,
+        };
+      },
       formTitle() {
         return this.inputType
       },
@@ -374,31 +512,32 @@
       },
       sesiErrors () {
         const errors = []
-        if (!this.$v.form.deskripsi.$dirty) return errors
-        !this.$v.form.deskripsi.required && errors.push('Harap masukkan sesi.')
+        if (!this.$v.form.sesi.$dirty) return errors
+        !this.$v.form.sesi.required && errors.push('Harap masukkan sesi.')
         return errors
       },
       customerErrors () {
         const errors = []
-        if (!this.$v.form.unit.$dirty) return errors
-        !this.$v.form.unit.required && errors.push('Nama customer harus diisi.')
+        if (!this.$v.form.id_customer.$dirty) return errors
+        !this.$v.form.id_customer.required && errors.push('Nama customer harus diisi.')
         return errors
       },
       pegawaiErrors() {
         const errors = []
-        if (!this.$v.form.tipe_menu.$dirty) return errors
-        !this.$v.form.tipe_menu.required && errors.push('Nama waiter harus diisi.')
+        if (!this.$v.form.id_waiter.$dirty) return errors
+        !this.$v.form.id_waiter.required && errors.push('Nama waiter harus diisi.')
         return errors
       },
       mejaErrors() {
         const errors = []
-        if (!this.$v.form.harga.$dirty) return errors
-        !this.$v.form.harga.required && errors.push('No. meja harus diisi.')
+        if (!this.$v.form.no_meja.$dirty) return errors
+        !this.$v.form.no_meja.required && errors.push('No. meja harus diisi.')
         return errors
       },
     },
 
     methods: {
+      moment,
       // function buat format angka
       formatPrice(value) {
         let val = (value/1).toFixed(0).replace('.', ',')
@@ -415,6 +554,18 @@
         }
         // Directly return the joined string
         return splitStr.join(' ');
+      },
+
+      addCustomerFirst(){
+        this.dialogAddCustomer = false
+        this.$router.push({
+          name: "customer",
+        });
+      },
+
+      openDialog(){
+        this.dialogAddCustomer = false
+        this.dialog = true
       },
 
       // submit form
@@ -458,7 +609,7 @@
       },
 
       readDataPegawai(){
-        var url = this.$api + '/pegawai'
+        var url = this.$api + '/pegawai/waiter'
         this.$http.get(url, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -481,13 +632,25 @@
         })
       },
 
+      readDataMejaTersedia(){
+        var url = this.$api + '/meja/tersedia'
+        this.$http.get(url, {
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          }
+        }).then(response => {
+          this.loadingData = false
+          this.mejaTersedia = response.data.data
+        })
+      },
+
       //simpan data produk
       save() {
-        this.menu.append('id_pegawai', this.form.id_pegawai);
-        this.menu.append('id_customer', this.form.id_customer);
-        this.menu.append('no_meja', this.form.no_meja);
-        this.menu.append('tgl_reservasi', this.form.tgl_reservasi);
-        this.menu.append('sesi', this.form.sesi);
+        this.reservasi.append('id_waiter', this.form.id_waiter);
+        this.reservasi.append('id_customer', this.form.id_customer);
+        this.reservasi.append('no_meja', this.form.no_meja);
+        this.reservasi.append('tgl_reservasi', this.form.tgl_reservasi);
+        this.reservasi.append('sesi', this.form.sesi);
 
         var url = this.$api + '/reservasi/'
         this.load = true
@@ -496,6 +659,7 @@
             'Authorization': 'Bearer ' + localStorage.getItem('token')
           }
         }).then(response => {
+          this.saveMeja(this.form.no_meja)
           this.error_message=response.data.message;
           this.color="green"
           this.iconSnackbar ='mdi-check-circle-outline'
@@ -506,7 +670,75 @@
           this.resetForm();
         }).catch(error => {
           console.log(Object.values(error.response.data.message))
-          this.error_message=Object.values(error.response.data.message).toString();
+          this.error_message=error.response.data.message;
+          this.color="red"
+          this.iconSnackbar ='mdi-alert-circle-outline'
+          this.snackbar=true;
+          this.load = false;
+        })
+      },
+
+      //simpan data meja kalo update/tambah
+      saveMeja(id) {
+        let newData = {
+          status_meja: 'tidak tersedia',
+        }
+        var url = this.$api + '/meja/' + id;
+
+        this.load = true
+
+        this.$http.put(url, newData, {
+              headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+              }
+        }).then(response => {
+          this.error_message=response.data.message;
+          console.log(this.form.no_meja)
+          this.color="green"
+          this.iconSnackbar ='mdi-check-circle-outline'
+          this.snackbar=true;
+          this.load = false;
+          this.close();
+          this.readData(); //mengambil data
+          this.resetForm();
+        }).catch(error => {
+          console.log(Object.values(error.response.data.message))
+          console.log()
+          this.error_message=error.response.data.message;
+          this.color="red"
+          this.iconSnackbar ='mdi-alert-circle-outline'
+          this.snackbar=true;
+          this.load = false;
+        })
+      },
+
+      //simpan data meja kalo delete reservasi
+      saveMejaDelete(id) {
+        let newData = {
+          status_meja: 'tersedia',
+        }
+        var url = this.$api + '/meja/' + id;
+
+        this.load = true
+
+        this.$http.put(url, newData, {
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          }
+        }).then(response => {
+          this.error_message=response.data.message;
+          console.log(this.form.no_meja)
+          this.color="green"
+          this.iconSnackbar ='mdi-check-circle-outline'
+          this.snackbar=true;
+          this.load = false;
+          this.close();
+          this.readData(); //mengambil data
+          this.resetForm();
+        }).catch(error => {
+          console.log(Object.values(error.response.data.message))
+          console.log()
+          this.error_message=error.response.data.message;
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle-outline'
           this.snackbar=true;
@@ -517,11 +749,11 @@
       //ubah data karyawan
       update() {
         let newData = {
-          id_pegawai: this.id_pegawai,
-          id_customer: this.id_customer,
-          no_meja: this.no_meja,
-          tgl_reservasi: this.tgl_reservasi,
-          sesi: this.sesi,
+          id_waiter: this.form.id_waiter,
+          id_customer: this.form.id_customer,
+          no_meja: this.form.no_meja,
+          tgl_reservasi: this.form.tgl_reservasi,
+          sesi: this.form.sesi,
         }
         var url = this.$api + '/reservasi/' + this.editId;
 
@@ -532,6 +764,7 @@
             'Authorization': 'Bearer ' + localStorage.getItem('token')
           }
         }).then(response => {
+          this.saveMeja(this.form.no_meja)
           this.error_message=response.data.message;
           this.color="green"
           this.iconSnackbar ='mdi-check-circle-outline'
@@ -543,7 +776,7 @@
           this.inputType = 'Tambah';
 
         }).catch(error => {
-          this.error_message=Object.values(error.response.data.message).toString();
+          this.error_message=error.response.data.message;
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle-outline'
           this.snackbar=true;
@@ -562,6 +795,7 @@
             'Authorization': 'Bearer ' + localStorage.getItem('token')
           }
         }).then(response => {
+          this.saveMejaDelete(this.idMejaDelete)
           this.error_message=response.data.message;
           this.color="green"
           this.snackbar=true;
@@ -584,21 +818,50 @@
       editHandler(item){
         this.inputType = 'Ubah';
         this.editId = item.id_reservasi;
-        this.form.id_pegawai= item.id_pegawai,
-        this.form.id_customer= item.id_customer,
-        this.form.no_meja= item.no_meja,
-        this.form.tgl_reservasi= item.tgl_reservasi,
-        this.form.sesi= item.sesi,
+        this.form.id_waiter= item.id_waiter
+        this.form.id_customer= item.id_customer
+        this.form.no_meja= item.no_meja
+        this.form.tgl_reservasi= item.tgl_reservasi
+        this.form.sesi= item.sesi
+        this.tgl_pesan = item.created_at
         this.dialog = true;
       },
 
       deleteHandler(item){
         this.deleteId = item.id_reservasi
+        this.idMejaDelete = item.no_meja
         this.dialogConfirm = true;
       },
 
+      //handler buka dialog qr code
+      printHandler(item){
+        this.editId = item.id_reservasi
+        this.qrText = item.id_reservasi + ';' + item.nama_customer + ';' + item.no_meja + ';' + moment(new Date()).format('DD-MM-YYYY HH:mm')
+        let tableWaiter= this.pegawais.find(pegawais => pegawais.id_pegawai === item.id_waiter)
+        console.log(tableWaiter.nama_pegawai)
+        this.printedBy = tableWaiter.nama_pegawai
+        this.dialogPrint = true;
+      },
+      //fungsi download pdf
+      printPdf(){
+        var canvas = document.getElementById('testHtml')
+        html2canvas(canvas).then(function (canvas){
+          var imgData = canvas.toDataURL('image/png')
+          var doc = new jsPDF('p', 'mm', 'A6')
+
+          doc.addImage({
+            imageData: imgData,
+            format: 'PNG',
+            x:3,
+            y:8,
+            compression:'NONE'})
+          // doc.addImage(imgData,'PNG',150,150)
+          doc.save('test.pdf')
+        })
+      },
       close() {
         this.$v.$reset()
+        this.dialogPrint = false
         this.dialogConfirm = false
         this.dialog = false
         this.inputType = 'Tambah';
@@ -615,7 +878,7 @@
       resetForm() {
         this.$v.$reset()
         this.form = {
-          id_pegawai: null,
+          id_waiter: null,
           id_customer: null,
           no_meja: null,
           tgl_reservasi: null,
@@ -629,6 +892,7 @@
       this.readData()
       this.readDataCustomer()
       this.readDataMeja()
+      this.readDataMejaTersedia()
       this.readDataPegawai()
     },
   }

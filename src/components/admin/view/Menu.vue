@@ -53,8 +53,8 @@
 
           </template>
 
-          <template v-slot:item.is_available="{ item }">
-            <v-chip v-if="item.is_available" color="accent" outlined> Ya </v-chip>
+          <template v-slot:item.ketersediaan="{ item }">
+            <v-chip v-if="item.ketersediaan" color="accent" outlined> Ya </v-chip>
             <v-chip v-else color="red" outlined>Tidak</v-chip>
           </template>
 
@@ -102,7 +102,7 @@
         </v-data-table>
       </v-card>
 
-      <v-dialog v-model="dialog" persistent max-width="600px">
+      <v-dialog v-model="dialog" persistent max-width="700px">
         <v-card class="px-5 py-5">
           <v-card-title>
             <span class="headline font-weight-bold">{{ formTitle }} Data Menu</span>
@@ -224,7 +224,30 @@
               </v-col>
             </v-row>
 
-            <v-row class="pt-0 mt-0">
+            <v-row class="pt-0 mt-0" v-if="inputType==='Ubah' || this.tempGambar!=null">
+              <v-col cols="4" class="mx-auto">
+                <v-img class="mx-auto" :src="'http://localhost:8000'+this.tempGambar" max-width="200" max-height="200"></v-img>
+              </v-col>
+              <v-col cols="8">
+                <v-file-input
+                    outlined
+                    rounded
+                    truncate-length="12"
+                    class="rounded-lg"
+                    v-model="form.str_gambar"
+                    label="Gambar"
+                    required
+                    prepend-icon=""
+                    accept="image/png, image/jpeg, image/bmp"
+                >
+                  <template v-slot:prepend-inner>
+                    <v-icon class="mr-5">mdi-camera-outline</v-icon>
+                  </template>
+                </v-file-input>
+              </v-col>
+            </v-row>
+
+            <v-row class="pt-0 mt-0" v-else>
               <v-col>
                 <v-file-input
                     outlined
@@ -236,12 +259,9 @@
                     required
                     prepend-icon=""
                     accept="image/png, image/jpeg, image/bmp"
-                    :error-messages="gambarErrors"
-                    @input="$v.form.str_gambar.$touch()"
-                    @blur="$v.form.str_gambar.$touch()"
                 >
                   <template v-slot:prepend-inner>
-                    <v-icon class="mr-5">mdi-cash</v-icon>
+                    <v-icon class="mr-5">mdi-camera-outline</v-icon>
                   </template>
                 </v-file-input>
               </v-col>
@@ -250,7 +270,7 @@
 
           <v-card-actions class="pr-8 pt-9 pb-5">
             <v-spacer></v-spacer>
-            <v-btn color="red" text @click="cancel" class="ml-3 pa-6 font-weight-bold">
+            <v-btn color="grey darken-1" text @click="cancel" class="ml-3 pa-6 font-weight-bold">
               Cancel
             </v-btn>
             <v-btn color="primary" elevation="0" @click="setForm" class="px-9 py-6 font-weight-bold">
@@ -260,22 +280,35 @@
         </v-card>
       </v-dialog>
 
-      <v-snackbar multi-line v-model="snackbar" light timeout="4000" right bottom >
-          <v-icon class="mr-3" :color="color">
-            {{iconSnackbar}}
-          </v-icon>
-          <span class="font-weight-bold">{{error_message}}</span>
-          <template v-slot:action="{ attrs }">
-            <v-btn
-                color="grey"
-                text
-                icon
-                v-bind="attrs"
-                @click="snackbar = false"
-            >
-              <v-icon>mdi-close-circle-outline</v-icon>
-            </v-btn>
-          </template>
+<!--      snackbar section-->
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+        <v-icon class="mr-3" :color="color">
+          {{iconSnackbar}}
+        </v-icon>
+        <span class="font-weight-bold" style="font-size: 1rem">Error</span>
+        <ul class="pt-3">
+          <li v-for="item in error_message" :key="item">
+            {{ item.toString() }}
+          </li>
+        </ul>
+      </v-snackbar>
+
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
+        <v-icon class="mr-3" :color="color">
+          {{iconSnackbar}}
+        </v-icon>
+        <span class="font-weight-bold">{{error_message}}</span>
+        <!--        <template v-slot:action="{ attrs }">-->
+        <!--          <v-btn-->
+        <!--              color="grey"-->
+        <!--              text-->
+        <!--              icon-->
+        <!--              v-bind="attrs"-->
+        <!--              @click="snackbar = false"-->
+        <!--          >-->
+        <!--            <v-icon>mdi-close-circle-outline</v-icon>-->
+        <!--          </v-btn>-->
+        <!--        </template>-->
       </v-snackbar>
 
       <v-dialog v-model="dialogConfirm" persistent max-width="400px">
@@ -289,7 +322,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="secondary" class="mb-3 pa-6 font-weight-bold"  text @click="close">
+            <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="close">
               Cancel
             </v-btn>
             <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
@@ -316,33 +349,6 @@ import {
 
 export default {
   name: "Menu",
-  // validations() {
-  //   if (this.inputType==='Tambah') {
-  //     return {
-  //       form: {
-  //         id_bahan:{ required},
-  //         nama_menu: { required, },
-  //         deskripsi: { required, },
-  //         unit: { required },
-  //         tipe_menu: { required },
-  //         harga: {required, numeric },
-  //
-  //       }
-  //     }
-  //   } else {
-  //     return {
-  //       form: {
-  //         id_bahan:{ required},
-  //         nama_menu: { required, },
-  //         deskripsi: { required, },
-  //         unit: { required },
-  //         tipe_menu: { required },
-  //         harga: { required, numeric },
-  //         is_available: { required },
-  //       }
-  //     }
-  //   }
-  // },
   validations: {
     form: {
       id_bahan:{ required},
@@ -351,7 +357,7 @@ export default {
       unit: { required },
       tipe_menu: { required },
       harga: { required, numeric },
-      str_gambar: { required },
+      // str_gambar: { required },
     }
   },
 
@@ -378,7 +384,7 @@ export default {
         { text: "Deskripsi", value: "deskripsi", sortable: false},
         { text: "Unit", value: "unit",width: 90},
         { text: "Harga", value: "harga",width: 150 },
-        { text: "Tersedia", value: "is_available",width: 90, sortable: false,  },
+        { text: "Tersedia", value: "ketersediaan",width: 90, sortable: false,  },
         { value: 'actions', sortable: false, width:100 },
       ],
       menu: new FormData,
@@ -391,23 +397,22 @@ export default {
       ],
       form: {
         id_bahan: null,
-        nama_menu: null,
-        deskripsi: null,
-        unit: null,
-        tipe_menu: null,
+        nama_menu: '',
+        deskripsi: '',
+        unit: '',
+        tipe_menu: '',
         harga: null,
-        is_available: null,
         str_gambar:null,
       },
+      tempGambar:null,
       editId: '',
       editedItem: {
         id_bahan: null,
-        nama_menu: null,
-        deskripsi: null,
-        unit: null,
-        tipe_menu: null,
+        nama_menu: '',
+        deskripsi: '',
+        unit: '',
+        tipe_menu: '',
         harga: null,
-        is_available: null,
         str_gambar:null,
       },
     };
@@ -454,12 +459,12 @@ export default {
       !this.$v.form.id_bahan.required && errors.push('Bahan harus diisi.')
       return errors
     },
-    gambarErrors() {
-      const errors = []
-      if (!this.$v.form.str_gambar.$dirty) return errors
-      !this.$v.form.str_gambar.required && errors.push('Gambar harus diisi.')
-      return errors
-    },
+    // gambarErrors() {
+    //   const errors = []
+    //   if (!this.$v.form.str_gambar.$dirty) return errors
+    //   !this.$v.form.str_gambar.required && errors.push('Gambar harus diisi.')
+    //   return errors
+    // },
   },
 
   methods: {
@@ -489,9 +494,9 @@ export default {
     // submit form
     setForm() {
       this.$v.$touch()
-      console.log(this.$v)
+      // console.log(this.$v)
       if(!this.$v.$error) {
-      console.log(this.menu)
+      // console.log(this.menu)
         if (this.inputType === 'Tambah')
         {
           this.save()
@@ -536,18 +541,18 @@ export default {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
         }
       }).then(response => {
-        console.log(Object.values(response.data.message).toString())
-        // this.error_message=response.data.message;
-        // this.color="green"
-        // this.iconSnackbar ='mdi-check-circle-outline'
-        // this.snackbar=true;
+        console.log(response.data.message)
+        this.error_message=response.data.message;
+        this.color="green"
+        this.iconSnackbar ='mdi-check-circle-outline'
+        this.snackbar=true;
         this.load = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
       }).catch(error => {
-        console.log(Object.values(error.response.data.message))
-        // this.error_message=Object.values(error.response.data.message).toString();
+        console.log(error.response.data.message)
+        // this.error_message=error.response.data.message;
         // this.color="red"
         // this.iconSnackbar ='mdi-alert-circle-outline'
         this.snackbar=true;
@@ -563,17 +568,7 @@ export default {
       this.menu.append('unit', this.form.unit);
       this.menu.append('tipe_menu', this.form.tipe_menu);
       this.menu.append('harga', this.form.harga);
-
       this.menu.append('str_gambar', this.form.str_gambar);
-
-      let id_table= this.bahans.find(bahans => bahans.id_bahan === this.form.id_bahan)
-      console.log(id_table.id_bahan)
-      if(id_table.jumlah_stok >= id_table.jumlah_per_sajian)
-      {
-        this.menu.append('is_available', 1);
-      }
-      else
-        this.menu.append('is_available', 0);
 
       var url = this.$api + '/menu/'
       this.load = true
@@ -592,7 +587,7 @@ export default {
         this.resetForm();
       }).catch(error => {
         console.log(Object.values(error.response.data.message))
-        this.error_message=Object.values(error.response.data.message).toString();
+        this.error_message=error.response.data.message;
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle-outline'
         this.snackbar=true;
@@ -600,7 +595,7 @@ export default {
       })
     },
 
-    //ubah data karyawan
+    //ubah data menu
     update() {
       let newData = {
         id_bahan: this.form.id_bahan,
@@ -611,6 +606,16 @@ export default {
         harga: this.form.harga,
         is_available: this.form.is_available,
       }
+
+      let id_table= this.bahans.find(bahans => bahans.id_bahan === this.form.id_bahan)
+      console.log(id_table.id_bahan)
+      if(id_table.jumlah_stok >= id_table.jumlah_per_sajian)
+      {
+        this.menu.append('is_available', 1);
+      }
+      else
+        this.menu.append('is_available', 0);
+
       var url = this.$api + '/menu/' + this.editId;
 
       this.load = true
@@ -620,7 +625,10 @@ export default {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
         }
       }).then(response => {
-        this.saveImage()
+        if(this.form.str_gambar!==null)
+        {
+          this.saveImage()
+        }
         this.error_message=response.data.message;
         this.color="green"
         this.iconSnackbar ='mdi-check-circle-outline'
@@ -632,7 +640,7 @@ export default {
         this.inputType = 'Tambah';
 
       }).catch(error => {
-        this.error_message=Object.values(error.response.data.message).toString();
+        this.error_message=error.response.data.message;
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle-outline'
         this.snackbar=true;
@@ -665,7 +673,7 @@ export default {
         this.error_message=error.response.data.message;
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle-outline'
-        this.form.nama_menu = null //reset form.nama_customer
+        this.form.nama_menu = '' //reset form.nama_menu
         this.snackbar=true;
         this.load = false;
       })
@@ -681,7 +689,8 @@ export default {
       this.form.tipe_menu= item.tipe_menu
       this.form.harga= item.harga
       this.form.is_available= item.is_available
-      this.form.str_gambar = item.str_gambar
+      this.tempGambar=item.str_gambar
+      console.log(typeof this.form.str_gambar)
       this.dialog = true;
     },
 
@@ -696,7 +705,8 @@ export default {
       this.dialogConfirm = false
       this.dialog = false
       this.inputType = 'Tambah';
-      this.form.nama_menu = null //reset form.nama_menu
+      this.form.nama_menu = '' //reset form.nama_menu
+      this.tempGambar=null
     },
 
     cancel() {
@@ -705,21 +715,23 @@ export default {
       this.readData();
       this.dialog = false;
       this.inputType = 'Tambah';
-      this.form.nama_menu = null //reset form.nama_menu
+      this.tempGambar=null
+      this.form.nama_menu = '' //reset form.nama_menu
     },
 
     resetForm() {
       this.$v.$reset()
       this.form = {
         id_bahan: null,
-        nama_menu: null,
-        deskripsi: null,
-        unit: null,
-        tipe_menu: null,
+        nama_menu: '',
+        deskripsi: '',
+        unit: '',
+        tipe_menu: '',
         harga: null,
-        is_available: null,
-        str_gambar: null,
+        is_available: 0,
+        str_gambar:null,
       };
+      this.tempGambar=null
     },
   },
 
