@@ -37,13 +37,93 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-list class="px-5 drawer">
-          <v-list-item v-for="item in items" :key="item.title" link :to="item.href" class="px-3 my-3 rounded-lg">
+        <v-list class="px-5 drawer" v-if="role==='Operasional Manager'">
+          <v-list-item v-for="item in itemsManager" :key="item.title" link :to="item.href" class="px-3 my-3 rounded-lg">
             <v-list-item-icon class="px-3" >
               <v-icon  >{{ item.icon }}</v-icon>
             </v-list-item-icon>
             <v-list-item-content>
-              <v-list-item-title id="listTab" color="#11111">{{ item.title }}</v-list-item-title>
+              <v-list-item-title class="listTab" color="#11111">{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <v-list-item @click="logout" class="px-3 rounded-lg" style="margin-top: 40%">
+            <v-list-item-icon class="px-3">
+              <v-icon color="red">mdi-logout-variant</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="font-weight-bold" style="color: #D24848">Logout</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+
+        <v-list class="px-5 drawer" v-else-if="role==='Owner'">
+          <v-list-item v-for="item in itemsOwner" :key="item.title" link :to="item.href" class="px-3 my-3 rounded-lg">
+            <v-list-item-icon class="px-3" >
+              <v-icon  >{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="listTab" color="#11111">{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <v-list-item @click="logout" class="px-3 rounded-lg" style="margin-top: 40%">
+            <v-list-item-icon class="px-3">
+              <v-icon color="red">mdi-logout-variant</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="font-weight-bold" style="color: #D24848">Logout</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+
+        <v-list class="px-5 drawer" v-else-if="role==='Kasir'">
+          <v-list-item v-for="item in itemsKasir" :key="item.title" link :to="item.href" class="px-3 my-3 rounded-lg">
+            <v-list-item-icon class="px-3" >
+              <v-icon  >{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="listTab" color="#11111">{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <v-list-item @click="logout" class="px-3 rounded-lg" style="margin-top: 40%">
+            <v-list-item-icon class="px-3">
+              <v-icon color="red">mdi-logout-variant</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="font-weight-bold" style="color: #D24848">Logout</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+
+        <v-list class="px-5 drawer" v-else-if="role==='Waiter'">
+          <v-list-item v-for="item in itemsWaiter" :key="item.title" link :to="item.href" class="px-3 my-3 rounded-lg">
+            <v-list-item-icon class="px-3" >
+              <v-icon  >{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="listTab" color="#11111">{{ item.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
+          <v-list-item @click="logout" class="px-3 rounded-lg" style="margin-top: 40%">
+            <v-list-item-icon class="px-3">
+              <v-icon color="red">mdi-logout-variant</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="font-weight-bold" style="color: #D24848">Logout</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+
+        <v-list class="px-5 drawer" v-else-if="role==='Waiter dan Kasir'">
+          <v-list-item v-for="item in itemsWaiterKasir" :key="item.title" link :to="item.href" class="px-3 my-3 rounded-lg">
+            <v-list-item-icon class="px-3" >
+              <v-icon  >{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="listTab" color="#11111">{{ item.title }}</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
 
@@ -86,7 +166,7 @@ export default {
     return {
       sidebarMenu: true,
       toggleMini: false,
-      items: [
+      itemsManager: [
         { title:"Dashboard", href:"/dashboard", icon:"mdi-view-dashboard-outline"},
         { title:"Bahan", href:"/bahan", icon:"mdi-food-steak"},
         { title:"Customer", href:"/customer", icon:"mdi-account-supervisor-outline" },
@@ -94,10 +174,44 @@ export default {
         { title:"Laporan", href:"/laporan", icon:"mdi-file-chart-outline" },
         { title:"Meja", href:"/meja", icon:"mdi-table-chair" },
         { title:"Menu", href:"/menu", icon:"mdi-room-service-outline" },
-        { title:"Order", href:"/order", icon:"mdi-order-bool-ascending" },
+        // { title:"Order", href:"/order", icon:"mdi-order-bool-ascending" },
         { title:"Reservasi", href:"/reservasi", icon:"mdi-book-account-outline" },
         { title:"Role", href:"/role", icon:"mdi-account-search-outline" },
         { title:"Stok", href:"/stok", icon:"mdi-archive-outline" },
+        { title:"Transaksi", href:"/transaksi", icon:"mdi-cart-outline" },
+      ],
+      itemsOwner: [
+        { title:"Dashboard", href:"/dashboard", icon:"mdi-view-dashboard-outline"},
+        { title:"Karyawan", href:"/karyawan", icon:"mdi-account-group-outline" },
+        { title:"Laporan", href:"/laporan", icon:"mdi-file-chart-outline" },
+        { title:"Role", href:"/role", icon:"mdi-account-search-outline" },
+      ],
+      itemsWaiter: [
+        { title:"Dashboard", href:"/dashboard", icon:"mdi-view-dashboard-outline"},
+        { title:"Customer", href:"/customer", icon:"mdi-account-supervisor-outline" },
+        { title:"Meja", href:"/meja", icon:"mdi-table-chair" },
+        { title:"Menu", href:"/menu", icon:"mdi-room-service-outline" },
+        // { title:"Order", href:"/order", icon:"mdi-order-bool-ascending" },
+        { title:"Reservasi", href:"/reservasi", icon:"mdi-book-account-outline" },
+      ],
+      itemsKasir: [
+        { title:"Dashboard", href:"/dashboard", icon:"mdi-view-dashboard-outline"},
+        { title:"Meja", href:"/meja", icon:"mdi-table-chair" },
+        // { title:"Order", href:"/order", icon:"mdi-order-bool-ascending" },
+        { title:"Reservasi", href:"/reservasi", icon:"mdi-book-account-outline" },
+        { title:"Transaksi", href:"/transaksi", icon:"mdi-cart-outline" },
+      ],
+      itemsChef: [
+        { title:"Dashboard", href:"/dashboard", icon:"mdi-view-dashboard-outline"},
+        { title:"Bahan", href:"/bahan", icon:"mdi-food-steak"},
+        { title:"Stok", href:"/stok", icon:"mdi-archive-outline" },
+      ],
+      itemsWaiterKasir: [
+        { title:"Dashboard", href:"/dashboard", icon:"mdi-view-dashboard-outline"},
+        { title:"Customer", href:"/customer", icon:"mdi-account-supervisor-outline" },
+        { title:"Meja", href:"/meja", icon:"mdi-table-chair" },
+        { title:"Menu", href:"/menu", icon:"mdi-room-service-outline" },
+        { title:"Reservasi", href:"/reservasi", icon:"mdi-book-account-outline" },
         { title:"Transaksi", href:"/transaksi", icon:"mdi-cart-outline" },
       ],
       load: false,
@@ -151,7 +265,7 @@ export default {
   background-color: #111111 !important;
 }
 
-#listTab{
+.listTab{
   font-size: 0.9rem;
 }
 

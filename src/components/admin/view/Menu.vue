@@ -39,7 +39,6 @@
                       <v-img :src="'http://localhost:8000'+item.str_gambar"></v-img>
                     </v-avatar>
                   </v-btn>
-
                 </v-list-item-avatar>
 
                 <v-list-item-content style="padding-top: 0; padding-bottom: 0; max-width: 140px;" class="float-right">

@@ -400,6 +400,7 @@
                 outlined
                 rounded
                 class="rounded-lg"
+                type="password"
                 v-model="form.newPassword"
                 label="Password Baru"
                 required
@@ -413,6 +414,7 @@
                 outlined
                 rounded
                 class="rounded-lg"
+                type="password"
                 v-model="form.confirmPassword"
                 label="Confirm Password"
                 required

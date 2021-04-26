@@ -6,16 +6,81 @@
         <v-card-title class="mt-3 text-center">
           <v-text-field
               v-model="search"
-              append-icon="mdi-magnify"
               label="Search"
               filled
               rounded
               single-line
               dense
-              style="max-width: 400px!important;"
-              class="mt-6 ml-3 mr-8 mr-md-16 mr-xl-16 rounded-lg"
-          ></v-text-field>
+              style="max-width: 200px!important;"
+              class="mt-6 mx-3 rounded-lg"
+          >
+            <template v-slot:prepend-inner>
+              <v-icon class="mr-5">mdi-magnify</v-icon>
+            </template>
+          </v-text-field>
+
+          <v-menu
+              v-model="menu"
+              :close-on-content-click="false"
+              :nudge-right="40"
+              transition="scale-transition"
+              offset-y
+              min-width="auto"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                  style="max-width: 250px!important;"
+                  filled
+                  rounded
+                  single-line
+                  dense
+                  hide-details
+                  class="rounded-lg mx-3"
+                  v-model="form.tgl_reservasi"
+                  label="Tanggal Reservasi"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                  :error-messages="tanggalErrors"
+                  @input="$v.form.tgl_reservasi.$touch()"
+                  @blur="$v.form.tgl_reservasi.$touch()"
+              >
+                <template v-slot:prepend-inner>
+                  <v-icon class="mr-5">mdi-calendar</v-icon>
+                </template>
+              </v-text-field>
+            </template>
+            <v-date-picker
+                v-model="form.tgl_reservasi"
+                @input="menu = false"
+            ></v-date-picker>
+          </v-menu>
+
+          <v-select
+              style="max-width: 200px!important;"
+              filled
+              rounded
+              single-line
+              dense
+              class="rounded-lg mx-3"
+              v-model="form.sesi"
+              label="Sesi"
+              required
+              hide-details
+              :items="sesiList"
+              item-value="key"
+              item-text="name"
+              :error-messages="sesiErrors"
+              @input="$v.form.sesi.$touch()"
+              @blur="$v.form.sesi.$touch()"
+          >
+            <template v-slot:prepend-inner>
+              <v-icon class="mr-5">mdi-clock-time-eight-outline</v-icon>
+            </template>
+          </v-select>
+
           <v-spacer></v-spacer>
+
           <v-btn color="#37A37B" @click="save()" dark class="mr-3 px-4 py-5 rounded-lg font-weight-bold" elevation="0" style="font-size: 14px">
             <v-icon class="mr-3 ">
               mdi-plus
