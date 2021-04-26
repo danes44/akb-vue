@@ -27,16 +27,24 @@
 
         <v-data-table :headers="headers" :items="karyawans" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." sort-by="id_pegawai">
           <template v-slot:item.nama_pegawai="{ item }">
-            {{ titleCase(item.nama_pegawai) }}
-          </template>
+            <v-list style="padding: 0;" dense id="list">
+              <v-list-item class="pl-0">
+                <v-list-item-content style="padding-top: 0; padding-bottom: 0; max-width: 140px;" class="float-right">
+                  <v-list-item-title class="font-weight-bold text-truncate">
+                    {{ titleCase(item.nama_pegawai) }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle style="font-size: 10pt;" class="grey--text darken-4">
+                    <span v-if="item.role_pegawai === 'Operasional Manager'">
+                      Ops. Manager
+                    </span>
+                    <span v-else>
+                      {{ item.role_pegawai }}
+                    </span>
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
 
-          <template v-slot:item.role_pegawai="{ item }">
-            <span v-if="item.role_pegawai === 'Operasional Manager'">
-              Ops. Manager
-            </span>
-            <span v-else>
-              {{ item.role_pegawai }}
-            </span>
           </template>
 
           <template v-slot:item.email="{ item }">
@@ -257,6 +265,7 @@
                     :items="statusList"
                     item-value="key"
                     item-text="name"
+                    @change="changeStatus"
                     :error-messages="statusErrors"
                     @input="$v.form.status_pegawai.$touch()"
                     @blur="$v.form.status_pegawai.$touch()"
@@ -574,14 +583,14 @@
           { text: "Nama",
             align: "start",
             value: "nama_pegawai", width: 100 },
-          { text: "Role", value: "role_pegawai", width: 100,filterable: false},
+          // { text: "Role", value: "role_pegawai", width: 100,filterable: false},
           { text: "Telp.", value: "no_telp_pegawai",filterable: false, width: 70},
-          { text: "Email", value: "email",filterable: false, width: 100 },
+          { text: "Email", value: "email",filterable: false, width: 70 },
           { text: "Status", value: "status_pegawai", align: 'center', sortable: false,filterable: false, width:70},
           { text: "Gender", value: "jenis_kelamin", sortable: false,filterable: false, width: 70},
           { text: "Tgl Gabung", value: "tgl_gabung",filterable: false, width: 120  },
           { text: "Tgl Keluar", value: "tgl_keluar",filterable: false, width: 120  },
-          { value: 'actions', sortable: false,filterable: false, width: 100 },
+          { value: 'actions', sortable: false,filterable: false, width: 90 },
         ],
         karyawan: new FormData,
         karyawans: [],
@@ -724,7 +733,10 @@
           return true
         }
       },
-
+      changeStatus(){
+        if(this.form.status_pegawai==='aktif')
+          this.form.tgl_keluar=''
+      },
       // function buat uppercase each word
       titleCase(str) {
         var splitStr = str.toLowerCase().split(' ');
@@ -741,7 +753,7 @@
       setForm() {
         // console.log(this.form.tgl_gabung)
         // console.log(this.form.tgl_keluar)
-        // this.$v.$touch()
+        this.$v.$touch()
         // console.log(this.$v)
         if(!this.$v.$error) {
           console.log('2')
@@ -970,8 +982,8 @@
 tbody tr:nth-of-type(odd) {
   background-color: #707070 !important;
 }
-.v-avatar{
-  /*color:white!important;*/
+#list{
+  background-color: rgba(255,255,255,0);
 }
 
 </style>

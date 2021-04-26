@@ -499,10 +499,13 @@ export default {
       // console.log(this.menu)
         if (this.inputType === 'Tambah')
         {
+          console.log('sampe setForm belum masuk save()')
           this.save()
         }
-        else
+        else{
+          console.log('sampe setForm belum masuk update()')
           this.update()
+        }
       }
     },
 
@@ -516,6 +519,7 @@ export default {
       }).then(response => {
         this.loadingData = false
         this.menus = response.data.data
+        console.log(this.menus)
       })
     },
 
@@ -562,6 +566,7 @@ export default {
 
     //simpan data produk
     save() {
+      console.log(this.form.id_bahan)
       this.menu.append('id_bahan', this.form.id_bahan);
       this.menu.append('nama_menu', this.form.nama_menu);
       this.menu.append('deskripsi', this.form.deskripsi);
@@ -582,6 +587,7 @@ export default {
         this.iconSnackbar ='mdi-check-circle-outline'
         this.snackbar=true;
         this.load = false;
+        console.log('sampe sini')
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -604,18 +610,7 @@ export default {
         unit: this.form.unit,
         tipe_menu: this.form.tipe_menu,
         harga: this.form.harga,
-        is_available: this.form.is_available,
       }
-
-      let id_table= this.bahans.find(bahans => bahans.id_bahan === this.form.id_bahan)
-      console.log(id_table.id_bahan)
-      if(id_table.jumlah_stok >= id_table.jumlah_per_sajian)
-      {
-        this.menu.append('is_available', 1);
-      }
-      else
-        this.menu.append('is_available', 0);
-
       var url = this.$api + '/menu/' + this.editId;
 
       this.load = true
@@ -634,11 +629,13 @@ export default {
         this.iconSnackbar ='mdi-check-circle-outline'
         this.snackbar=true;
         this.load = false;
+
+        console.log(this.form.id_bahan)
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
         this.inputType = 'Tambah';
-
+        console.log('sampe sini')
       }).catch(error => {
         this.error_message=error.response.data.message;
         this.color="red"
@@ -688,9 +685,7 @@ export default {
       this.form.unit= item.unit
       this.form.tipe_menu= item.tipe_menu
       this.form.harga= item.harga
-      this.form.is_available= item.is_available
       this.tempGambar=item.str_gambar
-      console.log(typeof this.form.str_gambar)
       this.dialog = true;
     },
 
@@ -728,7 +723,6 @@ export default {
         unit: '',
         tipe_menu: '',
         harga: null,
-        is_available: 0,
         str_gambar:null,
       };
       this.tempGambar=null
@@ -739,6 +733,7 @@ export default {
     this.loadingData = true
     this.readData()
     this.readDataBahan()
+    console.log('menus '+this.menus)
   },
 }
 </script>

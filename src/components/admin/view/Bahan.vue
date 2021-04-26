@@ -285,8 +285,8 @@ export default {
         { text: "Nama Bahan",
           align: "start",
           value: "nama_bahan" },
-        { text: "Jumlah Stok", value: "jumlah_stok"},
-        { text: "Serving Size", value: "jumlah_per_sajian"},
+        { text: "Jumlah Stok", value: "jumlah_stok",filterable: false},
+        { text: "Serving Size", value: "jumlah_per_sajian",filterable: false},
         { text: "Tersedia", value: "ketersediaan"},
         // { text: "Unit", value: "unit", align: 'center', sortable: false, width:70},
         { value: 'actions', sortable: false },
@@ -446,6 +446,10 @@ export default {
 
     //ubah data bahan
     update() {
+      if(this.form.jumlah_per_sajian>this.form.jumlah_stok)
+        this.form.ketersediaan=0
+      else
+        this.form.ketersediaan=1
       let newData = {
         nama_bahan: this.form.nama_bahan,
         jumlah_stok: this.form.jumlah_stok,
@@ -578,10 +582,6 @@ export default {
       this.form.jumlah_stok = item.jumlah_stok
       this.form.jumlah_per_sajian = item.jumlah_per_sajian
       this.form.unit = item.unit
-      if(this.form.jumlah_per_sajian>this.form.jumlah_stok)
-        this.form.ketersediaan=0
-      else
-        this.form.ketersediaan=1
       this.dialog = true;
     },
 
