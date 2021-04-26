@@ -30,13 +30,16 @@
             <v-list style="padding: 0;" dense id="list">
               <v-list-item class="pl-0">
                 <v-list-item-avatar class="mr-3" rounded>
-                  <v-avatar v-if="item.str_gambar === null" size="40" rounded>
-                    <v-img :src="require('../../../assets/dummy.png')"></v-img>
-                  </v-avatar>
+                  <v-btn icon>
+                    <v-avatar v-if="item.str_gambar === null" size="40" rounded>
+                      <v-img :src="require('../../../assets/dummy.png')"></v-img>
+                    </v-avatar>
 
-                  <v-avatar v-else size="40" rounded>
-                    <v-img :src="'http://localhost:8000'+item.str_gambar"></v-img>
-                  </v-avatar>
+                    <v-avatar v-else size="40" rounded @click="showImage(item)">
+                      <v-img :src="'http://localhost:8000'+item.str_gambar"></v-img>
+                    </v-avatar>
+                  </v-btn>
+
                 </v-list-item-avatar>
 
                 <v-list-item-content style="padding-top: 0; padding-bottom: 0; max-width: 140px;" class="float-right">
@@ -332,6 +335,12 @@
         </v-card>
       </v-dialog>
 
+      <v-dialog v-model="dialogImage" max-width="1000px">
+        <v-card>
+          <v-img :src="'http://localhost:8000'+this.idImage" max-height="550"></v-img>
+        </v-card>
+      </v-dialog>
+
     </v-container>
   </div>
 </template>
@@ -375,6 +384,8 @@ export default {
       iconSnackbar:'',
       search: null,
       dialog: false,
+      dialogImage: false,
+      idImage: null,
       dialogConfirm: false,
       headers: [
         { text: "ID", value: "id_menu", width:70 },
@@ -477,6 +488,12 @@ export default {
     // function buat disable tanggal keluar kalo status karyawannya aktif
     isDateDisabled(status){
       return !(status !== null && status === 'non aktif');
+    },
+
+    //function show image when click avatar menu
+    showImage(item){
+      this.idImage = item.str_gambar
+      this.dialogImage = true
     },
 
     // function buat uppercase each word
