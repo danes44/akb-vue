@@ -25,9 +25,96 @@
 
         </v-card-title>
 
-        <v-data-table :headers="headers" :items="menus" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." sort-by="id_menu">
+        <v-data-table v-if="userRole==='Operasional Manager'"
+                      :headers="headersManager"
+                      :items="menus"
+                      :search="search"
+                      :loading="loadingData"
+                      loading-text="Data sedang dimuat..." sort-by="id_menu">
           <template v-slot:item.nama_menu="{ item }">
-            <v-list style="padding: 0;" dense id="list">
+            <v-list style="padding: 0;" dense class="list">
+              <v-list-item class="pl-0">
+                <v-list-item-avatar class="mr-3" rounded>
+                  <v-btn icon>
+                    <v-avatar v-if="item.str_gambar === null" size="40" rounded>
+                      <v-img :src="require('../../../assets/dummy.png')"></v-img>
+                    </v-avatar>
+
+                    <v-avatar v-else size="40" rounded @click="showImage(item)">
+                      <v-img :src="'http://localhost:8000'+item.str_gambar"></v-img>
+                    </v-avatar>
+                  </v-btn>
+                </v-list-item-avatar>
+
+                <v-list-item-content style="padding-top: 0; padding-bottom: 0; max-width: 140px;" class="float-right">
+                  <v-list-item-title class="font-weight-bold text-truncate">{{ titleCase(item.nama_menu) }}</v-list-item-title>
+                  <v-list-item-subtitle style="font-size: 10pt;" class="grey--text darken-4">{{ titleCase(item.tipe_menu) }}</v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </template>
+
+          <template v-slot:item.harga="{ item }">
+            <span v-if="item.harga === 0">Gratis</span>
+            <span v-else>Rp. {{ formatPrice(item.harga) }}</span>
+
+          </template>
+
+          <template v-slot:item.ketersediaan="{ item }">
+            <v-chip v-if="item.ketersediaan" color="accent" outlined> Ya </v-chip>
+            <v-chip v-else color="red" outlined>Tidak</v-chip>
+          </template>
+
+          <template v-slot:[`item.actions`]="{ item }">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    class="mr-2"
+                    rounded
+                    color="#2196F3"
+                    x-small
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="editHandler(item)"
+                >
+                  <v-icon>
+                    mdi-pencil
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Edit Data</span>
+            </v-tooltip>
+
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    rounded
+                    color="red"
+                    x-small
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="deleteHandler(item)"
+                >
+                  <v-icon>
+                    mdi-trash-can
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Delete Data</span>
+            </v-tooltip>
+          </template>
+
+        </v-data-table>
+        <v-data-table v-else
+                      :headers="headers"
+                      :items="menus"
+                      :search="search"
+                      :loading="loadingData"
+                      loading-text="Data sedang dimuat..." sort-by="id_menu">
+          <template v-slot:item.nama_menu="{ item }">
+            <v-list style="padding: 0;" dense class="list">
               <v-list-item class="pl-0">
                 <v-list-item-avatar class="mr-3" rounded>
                   <v-btn icon>
@@ -374,6 +461,7 @@ export default {
       // rulesInput: [
       //   value => !value || value.size < 5000000 || 'Harus dalam format .jpg, .png, atau .bmp dibawah 5 MB',
       // ],
+      userRole:localStorage.getItem('role'),
       loadingData: 'false',
       inputType: 'Tambah',
       load: false,
@@ -386,7 +474,7 @@ export default {
       dialogImage: false,
       idImage: null,
       dialogConfirm: false,
-      headers: [
+      headersManager:[
         { text: "ID", value: "id_menu", width:70 },
         { text: "Nama Menu",
           align: "start",
@@ -396,6 +484,16 @@ export default {
         { text: "Harga", value: "harga",width: 150 },
         { text: "Tersedia", value: "ketersediaan",width: 90, sortable: false,  },
         { value: 'actions', sortable: false, width:100 },
+      ],
+      headers: [
+        { text: "ID", value: "id_menu", width:70 },
+        { text: "Nama Menu",
+          align: "start",
+          value: "nama_menu",width: 150 },
+        { text: "Deskripsi", value: "deskripsi", sortable: false},
+        { text: "Unit", value: "unit",width: 90},
+        { text: "Harga", value: "harga",width: 150 },
+        { text: "Tersedia", value: "ketersediaan",width: 90, sortable: false,  },
       ],
       menu: new FormData,
       menus: [],
@@ -755,7 +853,7 @@ export default {
 </script>
 
 <style scoped>
-  #list{
+  .list{
     background-color: rgba(255,255,255,0);
   }
 </style>

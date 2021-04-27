@@ -283,195 +283,207 @@
 <!--          </v-card-actions>-->
 <!--        </v-card>-->
         </div>
+
         <v-stepper v-model="e1">
-          <v-stepper-header >
-            <v-stepper-step
-                step="1"
-            >
-              Set Data
-            </v-stepper-step>
+          <v-container>
+            <v-stepper-header class="elevation-0 py-5 px-5">
+              <v-stepper-step
+                  step="1"
+              >
+                Set Data
+              </v-stepper-step>
 
-            <v-divider></v-divider>
+              <v-divider></v-divider>
 
-            <v-stepper-step
-                :complete="e1 > 2"
-                step="2"
-            >
-              Pick Table
-            </v-stepper-step>
-          </v-stepper-header>
+              <v-stepper-step
+                  step="2"
+              >
+                Pick Table
+              </v-stepper-step>
+            </v-stepper-header>
 
-          <v-stepper-items>
-            <v-stepper-content step="1">
-              <v-card>
-                <v-select
-                  outlined
-                  rounded
-                  class="rounded-lg"
-                  v-model="form.id_customer"
-                  label="Nama Customer"
-                  required
-                  :items="customers"
-                  item-value="id_customer"
-                  item-text="nama_customer"
-                  :error-messages="customerErrors"
-                  @input="$v.form.id_customer.$touch()"
-                  @blur="$v.form.id_customer.$touch()"
-                  >
-                  <template v-slot:prepend-inner>
-                    <v-icon class="mr-5" >mdi-account-supervisor-outline</v-icon>
-                  </template>
-                </v-select>
-
-                <v-select
-                    outlined
-                    rounded
-                    class="rounded-lg"
-                    v-model="form.id_waiter"
-                    label="Nama Waiter"
-                    required
-                    :items="pegawais"
-                    item-value="id_pegawai"
-                    item-text="nama_pegawai"
-                    :error-messages="pegawaiErrors"
-                    @input="$v.form.id_waiter.$touch()"
-                    @blur="$v.form.id_waiter.$touch()"
-                >
-                  <template v-slot:prepend-inner>
-                    <v-icon class="mr-5">mdi-account-group-outline</v-icon>
-                  </template>
-                </v-select>
-
-                <v-row class="pt-0 mt-0">
-                  <v-col class="pb-0">
-                    <v-menu
-                        v-model="menu"
-                        :close-on-content-click="false"
-                        :nudge-right="40"
-                        transition="scale-transition"
-                        offset-y
-                        min-width="auto"
-                    >
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-text-field
-                            outlined
-                            rounded
-                            hide-details
-                            class="rounded-lg"
-                            v-model="form.tgl_reservasi"
-                            label="Tanggal Reservasi"
-                            readonly
-                            v-bind="attrs"
-                            v-on="on"
-                            :error-messages="tanggalErrors"
-                            @input="$v.form.tgl_reservasi.$touch()"
-                            @blur="$v.form.tgl_reservasi.$touch()"
-                        >
-                          <template v-slot:prepend-inner>
-                            <v-icon class="mr-5">mdi-calendar</v-icon>
-                          </template>
-                        </v-text-field>
-                      </template>
-                      <v-date-picker
-                          v-if="inputType==='Tambah'"
-                          v-model="form.tgl_reservasi"
-                          @input="menu = false"
-                          :min="new Date().toISOString().substr(0, 10)"
-                      ></v-date-picker>
-                      <v-date-picker
-                          v-else-if="inputType==='Ubah'"
-                          v-model="form.tgl_reservasi"
-                          @input="menu = false"
-                          :min="this.tgl_pesan"
-                      ></v-date-picker>
-                    </v-menu>
-                  </v-col>
-
-                  <v-col class="pb-0">
-                    <v-select
-                        outlined
-                        rounded
-                        class="rounded-lg"
-                        v-model="form.sesi"
-                        label="Sesi"
-                        required
-                        :items="sesiList"
-                        item-value="key"
-                        item-text="name"
-                        :error-messages="sesiErrors"
-                        @input="$v.form.sesi.$touch()"
-                        @blur="$v.form.sesi.$touch()"
-                    >
-                      <template v-slot:prepend-inner>
-                        <v-icon class="mr-5">mdi-clock-time-eight-outline</v-icon>
-                      </template>
-                    </v-select>
-                  </v-col>
-                </v-row>
-
-              </v-card>
-              <v-card-actions class="pt-5">
-                <v-btn color="primary" @click="nextStep(1,null)">
-                  Continue
-                </v-btn>
-
-                <v-btn text @click="cancel">
-                  Cancel
-                </v-btn>
-              </v-card-actions>
-
-            </v-stepper-content>
-
-            <v-stepper-content step="2">
-              <v-card>
-                <v-container class="px-6">
-                  <v-row>
-                    <v-col
-                      v-for="item in mejas"
-                      :key="item.no_meja"
-                      cols="12"
-                      sm="6"
-                      md="4"
-                      lg="3"
-                      xl="2"
-                    >
-                      <v-card
-                        elevation="0" v-if="item.status_meja==='tersedia'"
-                        color="accent"
-                        dark
-                        @click="nextStep(2,item)"
+            <v-stepper-items class="py-5 px-6">
+              <v-stepper-content step="1">
+                <v-card elevation="0">
+                  <v-row class="pt-0 mt-0">
+                    <v-col class="pb-0">
+                      <v-select
+                          outlined
+                          rounded
+                          class="rounded-lg"
+                          v-model="form.id_customer"
+                          label="Nama Customer"
+                          required
+                          :items="customers"
+                          item-value="id_customer"
+                          item-text="nama_customer"
+                          :error-messages="customerErrors"
+                          @input="$v.form.id_customer.$touch()"
+                          @blur="$v.form.id_customer.$touch()"
                       >
-                        <v-card-title class="heading font-weight-bold">
-                          {{ item.no_meja }}
-                        </v-card-title>
-                        <v-card-subtitle>
-                          {{ item.status_meja }}
-                        </v-card-subtitle>
-                      </v-card>
-                      <v-card elevation="0" v-else color="red" dark max-width="256px" @click="nextStep(2,item)">
-                        <v-card-title class="subheading font-weight-bold">
-                          {{ item.no_meja }}
-                        </v-card-title>
-                        <v-card-subtitle>
-                          {{ item.status_meja }}
-                        </v-card-subtitle>
-                      </v-card>
+                        <template v-slot:prepend-inner>
+                          <v-icon class="mr-5" >mdi-account-supervisor-outline</v-icon>
+                        </template>
+                      </v-select>
+                    </v-col>
+                    <v-col>
+                      <v-select
+                          outlined
+                          rounded
+                          class="rounded-lg"
+                          v-model="form.id_waiter"
+                          label="Nama Waiter"
+                          required
+                          :items="pegawais"
+                          item-value="id_pegawai"
+                          item-text="nama_pegawai"
+                          :error-messages="pegawaiErrors"
+                          @input="$v.form.id_waiter.$touch()"
+                          @blur="$v.form.id_waiter.$touch()"
+                      >
+                        <template v-slot:prepend-inner>
+                          <v-icon class="mr-5">mdi-account-group-outline</v-icon>
+                        </template>
+                      </v-select>
                     </v-col>
                   </v-row>
-                </v-container>
-              </v-card>
 
-              <v-btn color="primary" @click="e1 = 3">
-                Continue
-              </v-btn>
 
-              <v-btn text @click="e1=1">
-                Back
-              </v-btn>
-            </v-stepper-content>
+                  <v-row class="pt-0 mt-0">
+                    <v-col class="pb-0">
+                      <v-menu
+                          v-model="menu"
+                          :close-on-content-click="false"
+                          :nudge-right="40"
+                          transition="scale-transition"
+                          offset-y
+                          min-width="auto"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                              outlined
+                              rounded
+                              hide-details
+                              class="rounded-lg"
+                              v-model="form.tgl_reservasi"
+                              label="Tanggal Reservasi"
+                              readonly
+                              v-bind="attrs"
+                              v-on="on"
+                              :error-messages="tanggalErrors"
+                              @input="$v.form.tgl_reservasi.$touch()"
+                              @blur="$v.form.tgl_reservasi.$touch()"
+                          >
+                            <template v-slot:prepend-inner>
+                              <v-icon class="mr-5">mdi-calendar</v-icon>
+                            </template>
+                          </v-text-field>
+                        </template>
+                        <v-date-picker
+                            v-if="inputType==='Tambah'"
+                            v-model="form.tgl_reservasi"
+                            @input="menu = false"
+                            :min="new Date().toISOString().substr(0, 10)"
+                        ></v-date-picker>
+                        <v-date-picker
+                            v-else-if="inputType==='Ubah'"
+                            v-model="form.tgl_reservasi"
+                            @input="menu = false"
+                            :min="this.tgl_pesan"
+                        ></v-date-picker>
+                      </v-menu>
+                    </v-col>
 
-          </v-stepper-items>
+                    <v-col class="pb-0">
+                      <v-select
+                          outlined
+                          rounded
+                          class="rounded-lg"
+                          v-model="form.sesi"
+                          label="Sesi"
+                          required
+                          :items="sesiList"
+                          item-value="key"
+                          item-text="name"
+                          :error-messages="sesiErrors"
+                          @input="$v.form.sesi.$touch()"
+                          @blur="$v.form.sesi.$touch()"
+                      >
+                        <template v-slot:prepend-inner>
+                          <v-icon class="mr-5">mdi-clock-time-eight-outline</v-icon>
+                        </template>
+                      </v-select>
+                    </v-col>
+                  </v-row>
+
+                </v-card>
+                <v-card-actions class="pt-15">
+                  <v-spacer></v-spacer>
+                  <v-btn class="ml-3 pa-6 font-weight-bold" color="grey darken-1" text @click="cancel">
+                    Cancel
+                  </v-btn>
+
+                  <v-btn class="px-9 py-6 font-weight-bold" color="primary" elevation="0" @click="nextStep(1,null)">
+                    Continue
+                  </v-btn>
+                </v-card-actions>
+
+              </v-stepper-content>
+
+              <v-stepper-content step="2">
+                <v-card elevation="0" class="pb-5">
+                    <v-row class="pt-0 mt-0">
+                      <v-col
+                        v-for="item in mejas"
+                        :key="item.no_meja"
+                        cols="12"
+                        sm="6"
+                        md="4"
+                        lg="3"
+                        xl="3"
+                      >
+                        <v-card
+                          elevation="0" v-if="item.status_meja==='tersedia'"
+                          color="accent"
+                          dark
+                          min-width="150px"
+                          @click="setNoMeja(item)"
+                        >
+                          <v-card-title class="heading font-weight-bold">
+                            {{ item.no_meja }}
+                          </v-card-title>
+                          <v-card-subtitle>
+                            {{ titleCase(item.status_meja) }}
+                          </v-card-subtitle>
+                        </v-card>
+                        <v-card elevation="0" v-else color="red" dark min-width="150px" @click="nextStep(2,item)">
+                          <v-card-title class="subheading font-weight-bold">
+                            {{ item.no_meja }}
+                          </v-card-title>
+                          <v-card-subtitle>
+                            {{ titleCase(item.status_meja) }}
+                          </v-card-subtitle>
+                        </v-card>
+                      </v-col>
+                    </v-row>
+                </v-card>
+                <v-card-actions class="pt-15">
+                  <span>Meja terpilih : <b>{{ this.form.no_meja }}</b></span>
+                  <v-spacer></v-spacer>
+                  <v-btn class="ml-3 pa-6 font-weight-bold" color="grey darken-1" text @click="e1=1">
+                    Back
+                  </v-btn>
+                  <v-btn class="px-9 py-6 font-weight-bold" color="primary" elevation="0" @click="nextStep(2)">
+                    Submit
+                  </v-btn>
+                </v-card-actions>
+              </v-stepper-content>
+
+            </v-stepper-items>
+          </v-container>
         </v-stepper>
+
+
       </v-dialog>
 
 <!--      snackbar section-->
@@ -626,7 +638,7 @@
       form: {
         id_waiter: {required},
         id_customer: {required},
-        no_meja: {required},
+        // no_meja: {required},
         tgl_reservasi: {required},
         sesi: {required},
       }
@@ -734,31 +746,37 @@
         !this.$v.form.id_waiter.required && errors.push('Nama waiter harus diisi.')
         return errors
       },
-      mejaErrors() {
-        const errors = []
-        if (!this.$v.form.no_meja.$dirty) return errors
-        !this.$v.form.no_meja.required && errors.push('No. meja harus diisi.')
-        return errors
-      },
+      // mejaErrors() {
+      //   const errors = []
+      //   if (!this.$v.form.no_meja.$dirty) return errors
+      //   !this.$v.form.no_meja.required && errors.push('No. meja harus diisi.')
+      //   return errors
+      // },
     },
 
     methods: {
       moment,
 
-      nextStep(step,item){
+      nextStep(step){
         if(step===1)
         {
-          this.readDataMeja()
-          this.readDataMejaPerTanggal().then(()=>{
-            this.selectMeja()
-          })
+          this.$v.$touch()
+          console.log(this.$v)
+          if(!this.$v.$error) {
+            this.readDataMeja()
+            this.readDataMejaPerTanggal().then(() => {
+              this.selectMeja()
+            })
+          }
         }
         if(step===2)
         {
-          if(item.status_meja==='tersedia'){
-            this.form.no_meja=item.no_meja
-            this.setForm()
-          }
+          this.setForm()
+        }
+      },
+      setNoMeja(item){
+        if(item.status_meja==='tersedia'){
+          this.form.no_meja=item.no_meja
         }
       },
 

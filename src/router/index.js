@@ -6,7 +6,7 @@ Vue.use(VueRouter)
 function importComponent(path) {
   return () => import(`../components/${path}.vue`)
 }
-const userRole = localStorage.getItem('role')
+// const userRole = localStorage.getItem('role')
 const router = new VueRouter({
   mode: "history",
   routes: [
@@ -34,7 +34,7 @@ const router = new VueRouter({
           meta: {title: 'Bahan - AKB'},
           component: importComponent('admin/view/Bahan'),
           beforeEnter:((to,from,next)=>{
-            if(userRole==="Operasional Manager" || userRole==="Chef")
+            if(localStorage.getItem('role')==="Operasional Manager" || localStorage.getItem('role')==="Chef")
               next()
             else {
               next({
@@ -50,7 +50,7 @@ const router = new VueRouter({
           meta: {title: 'Customer - AKB'},
           component: importComponent('admin/view/Customer'),
           beforeEnter:((to,from,next)=>{
-            if(userRole==="Operasional Manager" || userRole==="Waiter" || userRole==="Waiter dan Kasir")
+            if(localStorage.getItem('role')==="Operasional Manager" || localStorage.getItem('role')==="Waiter" || localStorage.getItem('role')==="Waiter dan Kasir")
               next()
             else {
               next({
@@ -66,7 +66,7 @@ const router = new VueRouter({
           meta: {title: 'Karyawan - AKB'},
           component: importComponent('admin/view/Karyawan'),
           beforeEnter:((to,from,next)=>{
-            if(userRole==="Operasional Manager" || userRole==="Owner")
+            if(localStorage.getItem('role')==="Operasional Manager" || localStorage.getItem('role')==="Owner")
               next()
             else {
               next({
@@ -82,7 +82,7 @@ const router = new VueRouter({
           meta: {title: 'Laporan - AKB'},
           component: importComponent('admin/view/Laporan'),
           beforeEnter:((to,from,next)=>{
-            if(userRole==="Operasional Manager" || userRole==="Owner")
+            if(localStorage.getItem('role')==="Operasional Manager" || localStorage.getItem('role')==="Owner")
               next()
             else {
               next({
@@ -99,7 +99,7 @@ const router = new VueRouter({
           //yang bisa edit dan nambah meja cuma manager sama owner
           component: importComponent('admin/view/Meja'),
           beforeEnter:((to,from,next)=>{
-            if(userRole==="Chef"){
+            if(localStorage.getItem('role')==="Chef"){
               next({
                 path: '/dashboard',
               })
@@ -115,7 +115,7 @@ const router = new VueRouter({
           meta: {title: 'Menu - AKB'},
           component: importComponent('admin/view/Menu'),
           beforeEnter:((to,from,next)=>{
-            if(userRole==="Operasional Manager"){
+            if(localStorage.getItem('role')==="Operasional Manager"){
               next()
             }
             else{
@@ -138,7 +138,7 @@ const router = new VueRouter({
           meta: {title: 'Reservasi - AKB'},
           component: importComponent('admin/view/Reservasi'),
           beforeEnter:((to,from,next)=>{
-            if(userRole==="Operasional Manager" || userRole==="Waiter" || userRole==="Waiter dan Kasir")
+            if(localStorage.getItem('role')==="Operasional Manager" || localStorage.getItem('role')==="Waiter" || localStorage.getItem('role')==="Waiter dan Kasir")
               next()
             else {
               next({
@@ -154,7 +154,7 @@ const router = new VueRouter({
           meta: {title: 'Role Karyawan - AKB'},
           component: importComponent('admin/view/Role'),
           beforeEnter:((to,from,next)=>{
-            if(userRole==="Operasional Manager" || userRole==="Owner")
+            if(localStorage.getItem('role')==="Operasional Manager" || localStorage.getItem('role')==="Owner")
               next()
             else {
               next({
@@ -170,7 +170,7 @@ const router = new VueRouter({
           meta: {title: 'Stok - AKB'},
           component: importComponent('admin/view/Stok'),
           beforeEnter:((to,from,next)=>{
-            if(userRole==="Operasional Manager" || userRole==="Chef")
+            if(localStorage.getItem('role')==="Operasional Manager" || localStorage.getItem('role')==="Chef")
               next()
             else {
               next({
@@ -186,7 +186,7 @@ const router = new VueRouter({
           meta: {title: 'Transaksi - AKB'},
           component: importComponent('admin/view/Transaksi'),
           beforeEnter:((to,from,next)=>{
-            if(userRole==="Operasional Manager" ||  userRole==="Waiter dan Kasir")
+            if(localStorage.getItem('role')==="Operasional Manager" ||  localStorage.getItem('role')==="Waiter dan Kasir")
               next()
             else {
               next({
@@ -217,7 +217,7 @@ router.beforeEach((to, from, next) => {
 
   // if(to.meta.owner)
   // {
-  //   if (userRole === 'Owner') {
+  //   if (localStorage.getItem('role') === 'Owner') {
   //     next()
   //   } else {
   //     next({
@@ -227,7 +227,7 @@ router.beforeEach((to, from, next) => {
   // }
   // else if(to.meta.opsManager)
   // {
-  //   if (userRole === 'Operasional Manager') {
+  //   if (localStorage.getItem('role') === 'Operasional Manager') {
   //     next()
   //   } else {
   //     next({

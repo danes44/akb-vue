@@ -133,7 +133,27 @@
               <span>Change Password</span>
             </v-tooltip>
 
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    rounded
+                    color="red"
+                    x-small
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="deleteHandler(item)"
+                >
+                  <v-icon>
+                    mdi-trash-can
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Delete Data</span>
+            </v-tooltip>
+
           </template>
+
 
         </v-data-table>
       </v-card>
@@ -468,6 +488,27 @@
         <!--          </v-btn>-->
         <!--        </template>-->
       </v-snackbar>
+
+      <v-dialog v-model="dialogConfirm" persistent max-width="400px">
+        <v-card>
+          <v-card-title class="pt-6">
+            <v-icon color="red" class="h3 mr-4" size="30">mdi-alert-circle</v-icon>
+            <span class="h3 font-weight-bold red--text">Warning!</span>
+          </v-card-title>
+          <v-card-text>
+            Anda yakin ingin menghapus pegawai bernama <b>{{ form.nama_pegawai }}</b> ini?
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="close">
+              Cancel
+            </v-btn>
+            <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
+              Delete
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
     </v-container>
   </div>
@@ -913,6 +954,38 @@
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle'
           this.snackbar=true;
+          this.form.nama_pegawai = null //reset form.nama_customer
+          this.load = false;
+        })
+      },
+
+      //hapus data produk
+      deleteData() {
+        //mengahapus data
+        var url = this.$api + '/pegawai/' + this.deleteId;
+
+        //data dihapus berdasarkan id
+        this.$http.delete(url, {
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          }
+        }).then(response => {
+          this.error_message=response.data.message;
+          this.color="green"
+          this.snackbar=true;
+          this.iconSnackbar ='mdi-check-circle'
+          this.load = false;
+          this.close();
+          this.readData(); //mengambil data
+          this.resetForm();
+          this.dialogConfirm = false;
+          this.inputType = 'Tambah';
+        }).catch(error => {
+          this.error_message=error.response.data.message;
+          this.color="red"
+          this.iconSnackbar ='mdi-alert-circle'
+          this.form.nama_pegawai = '' //reset
+          this.snackbar=true;
           this.load = false;
         })
       },
@@ -936,11 +1009,17 @@
         this.is_updatePassword=true
         this.inputType = 'Ubah Password';
       },
+      deleteHandler(item){
+        this.deleteId = item.id_pegawai;
+        this.form.nama_pegawai = item.nama_pegawai
+        this.dialogConfirm = true;
+      },
       close() {
         this.$v.$reset()
         this.dialog = false
         this.dialogConfirm = false
         this.dialogUpdatePassword = false
+        this.form.nama_pegawai = '' //reset
         this.inputType = 'Tambah';
       },
 
@@ -951,6 +1030,7 @@
         this.dialog = false;
         this.dialogConfirm = false
         this.dialogUpdatePassword = false
+        this.form.nama_pegawai = '' //reset
         this.inputType = 'Tambah';
       },
 

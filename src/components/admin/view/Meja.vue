@@ -35,15 +35,13 @@
                   single-line
                   dense
                   hide-details
+                  clearable
                   class="rounded-lg mx-3"
-                  v-model="form.tgl_reservasi"
+                  v-model="show.tgl_reservasi"
                   label="Tanggal Reservasi"
                   readonly
                   v-bind="attrs"
                   v-on="on"
-                  :error-messages="tanggalErrors"
-                  @input="$v.form.tgl_reservasi.$touch()"
-                  @blur="$v.form.tgl_reservasi.$touch()"
               >
                 <template v-slot:prepend-inner>
                   <v-icon class="mr-5">mdi-calendar</v-icon>
@@ -51,7 +49,7 @@
               </v-text-field>
             </template>
             <v-date-picker
-                v-model="form.tgl_reservasi"
+                v-model="show.tgl_reservasi"
                 @input="menu = false"
             ></v-date-picker>
           </v-menu>
@@ -63,16 +61,15 @@
               single-line
               dense
               class="rounded-lg mx-3"
-              v-model="form.sesi"
+              v-model="show.sesi"
+              :disabled="disableSesi(show.tgl_reservasi)"
+              @change="searchMeja"
               label="Sesi"
               required
               hide-details
               :items="sesiList"
               item-value="key"
               item-text="name"
-              :error-messages="sesiErrors"
-              @input="$v.form.sesi.$touch()"
-              @blur="$v.form.sesi.$touch()"
           >
             <template v-slot:prepend-inner>
               <v-icon class="mr-5">mdi-clock-time-eight-outline</v-icon>
@@ -81,7 +78,9 @@
 
           <v-spacer></v-spacer>
 
-          <v-btn color="#37A37B" @click="save()" dark class="mr-3 px-4 py-5 rounded-lg font-weight-bold" elevation="0" style="font-size: 14px">
+          <v-btn color="#37A37B" v-if="userRole==='Operasional Manager'"
+                 @click="save()" dark outlined class="mr-3 px-4 py-5 rounded-lg font-weight-bold"
+                 elevation="0" style="font-size: 14px">
             <v-icon class="mr-3 ">
               mdi-plus
             </v-icon>
@@ -117,7 +116,7 @@
                       {{ titleCase(item.status_meja) }}
                     </v-card-subtitle>
 
-                    <v-card-actions >
+                    <v-card-actions v-if="userRole==='Operasional Manager'" >
                       <v-spacer></v-spacer>
                       <v-tooltip bottom>
                         <template v-slot:activator="{ on, attrs }">
@@ -168,7 +167,7 @@
                     <v-card-subtitle>
                       {{ titleCase(item.status_meja) }}
                     </v-card-subtitle>
-                    <v-card-actions>
+                    <v-card-actions v-if="userRole==='Operasional Manager'">
                       <v-spacer></v-spacer>
                       <v-tooltip bottom>
                         <template v-slot:activator="{ on, attrs }">
@@ -281,6 +280,8 @@ export default {
 
   data() {
     return {
+      userRole:localStorage.getItem('role'),
+      menu: false,
       filter: {},
       loadingData: 'false',
       inputType: 'Tambah',
@@ -309,6 +310,14 @@ export default {
       editedItem: {
         status_meja: null,
       },
+      show: {
+        tgl_reservasi: null,
+        sesi: null,
+      },
+      sesiList: [
+        { key: 'lunch', name: 'Lunch'},
+        { key: 'dinner', name: 'Dinner'},
+      ],
     };
   },
 
@@ -322,7 +331,15 @@ export default {
   },
 
   methods: {
-
+    disableSesi(tgl){
+      return !(tgl !== null);
+    },
+    searchMeja(){
+      this.readDataMeja()
+      this.readDataMejaPerTanggal().then(()=>{
+        this.selectMeja()
+      })
+    },
     customSearch (value, search) {
       const data = value
       var i  = data.length
@@ -370,6 +387,50 @@ export default {
       }).then(response => {
         this.loadingData = false
         this.mejas = response.data.data
+      })
+    },
+
+    readDataMeja(){
+      var url = this.$api + '/meja'
+      this.$http.get(url, {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      }).then(response => {
+        this.loadingData = false
+        this.mejas = response.data.data
+      })
+    },
+
+    selectMeja(){
+      for (let i = 0; i<this.mejaTersedia.length ; i++) {
+        console.log(this.mejaTersedia.length)
+        console.log(i)
+        for (let j = 0; j < this.mejas.length; j++) {
+          if(this.mejaTersedia[i].no_meja === this.mejas[j].no_meja)
+          {
+            this.mejas[j].status_meja = 'tidak tersedia'
+          }
+          console.log(this.mejas[j].status_meja)
+        }
+      }
+      this.e1=2
+    },
+
+    async readDataMejaPerTanggal(){
+      let newData = {
+        tgl_reservasi: this.show.tgl_reservasi,
+        sesi: this.show.sesi,
+      }
+      var url = this.$api + '/reservasi/select'
+      await this.$http.post(url, newData, {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      }).then(response => {
+        this.loadingData = false
+        this.mejaTersedia = response.data.data
+        console.log(this.mejaTersedia.length)
       })
     },
 

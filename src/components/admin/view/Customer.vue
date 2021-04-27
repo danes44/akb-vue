@@ -26,7 +26,7 @@
         </v-card-title>
 
         <v-data-table :headers="headers" :items="customers" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." striped>
-          <template v-slot:item.nama_pegawai="{ item }">
+          <template v-slot:item.nama_customer="{ item }">
             {{ titleCase(item.nama_customer) }}
           </template>
 
