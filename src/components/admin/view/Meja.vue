@@ -35,6 +35,11 @@
             <span>Search Filter</span>
           </v-tooltip>
 
+          <div v-show="this.show.sesi!==null && this.show.tgl_reservasi!==null">
+            <v-chip outlined class="mr-3">{{ this.show.tgl_reservasi }}</v-chip>
+            <v-chip outlined >{{ titleCase(this.show.sesi) }}</v-chip>
+          </div>
+
           <v-spacer></v-spacer>
 
           <v-btn color="#37A37B" v-if="userRole==='Operasional Manager'"
@@ -45,6 +50,7 @@
             </v-icon>
             Tambah Meja
           </v-btn>
+
         </v-card-title>
 
         <v-data-iterator :items="mejas" :search="search" :loading="loadingData" disable-pagination hide-default-footer class="pb-4">
