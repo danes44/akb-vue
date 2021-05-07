@@ -11,7 +11,7 @@
               rounded
               single-line
               dense
-              style="max-width: 200px!important;"
+              style="max-width: 400px!important;"
               class="mt-6 mx-3 rounded-lg"
           >
             <template v-slot:prepend-inner>
@@ -19,62 +19,21 @@
             </template>
           </v-text-field>
 
-          <v-menu
-              v-model="menu"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              min-width="auto"
-          >
+          <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                  style="max-width: 250px!important;"
-                  filled
-                  rounded
-                  single-line
-                  dense
-                  hide-details
-                  clearable
-                  class="rounded-lg mx-3"
-                  v-model="show.tgl_reservasi"
-                  label="Tanggal Reservasi"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-              >
-                <template v-slot:prepend-inner>
-                  <v-icon class="mr-5">mdi-calendar</v-icon>
-                </template>
-              </v-text-field>
+              <v-btn color="primary"
+                     @click="dialogFilter = true" dark icon
+                     class="mr-3 px-4 py-5 rounded-lg font-weight-bold"
+                     elevation="0"
+                     v-bind="attrs"
+                     v-on="on" style="font-size: 14px">
+                <v-icon class="">
+                  mdi-filter-variant
+                </v-icon>
+              </v-btn>
             </template>
-            <v-date-picker
-                v-model="show.tgl_reservasi"
-                @input="menu = false"
-            ></v-date-picker>
-          </v-menu>
-
-          <v-select
-              style="max-width: 200px!important;"
-              filled
-              rounded
-              single-line
-              dense
-              class="rounded-lg mx-3"
-              v-model="show.sesi"
-              :disabled="disableSesi(show.tgl_reservasi)"
-              @change="searchMeja"
-              label="Sesi"
-              required
-              hide-details
-              :items="sesiList"
-              item-value="key"
-              item-text="name"
-          >
-            <template v-slot:prepend-inner>
-              <v-icon class="mr-5">mdi-clock-time-eight-outline</v-icon>
-            </template>
-          </v-select>
+            <span>Search Filter</span>
+          </v-tooltip>
 
           <v-spacer></v-spacer>
 
@@ -219,7 +178,7 @@
       </v-card>
 
 <!--      snackbar section-->
-      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -231,7 +190,7 @@
         </ul>
       </v-snackbar>
 
-      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -270,6 +229,88 @@
         </v-card>
       </v-dialog>
 
+      <v-dialog v-model="dialogFilter" persistent max-width="400px">
+        <v-card>
+          <v-container>
+            <v-toolbar elevation="0">
+              <span class="headline font-weight-bold">Filter Search Meja</span>
+              <v-spacer></v-spacer>
+              <v-btn
+                  icon
+                  @click="dialogFilter = false"
+              >
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </v-toolbar>
+              <v-menu
+                  v-model="menu"
+                  :close-on-content-click="false"
+                  :nudge-right="40"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="auto"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                      filled
+                      rounded
+                      single-line
+                      dense
+                      hide-details
+                      clearable
+                      class="rounded-lg mx-3 my-5"
+                      v-model="show.tgl_reservasi"
+                      label="Tanggal Reservasi"
+                      readonly
+                      v-bind="attrs"
+                      v-on="on"
+                  >
+                    <template v-slot:prepend-inner>
+                      <v-icon class="mr-5">mdi-calendar</v-icon>
+                    </template>
+                  </v-text-field>
+                </template>
+                <v-date-picker
+                    v-model="show.tgl_reservasi"
+                    @input="menu = false"
+                ></v-date-picker>
+              </v-menu>
+
+              <v-select
+                  filled
+                  rounded
+                  single-line
+                  dense
+                  clearable
+                  class="rounded-lg mx-3 my-5"
+                  v-model="show.sesi"
+                  :disabled="disableSesi(show.tgl_reservasi)"
+                  label="Sesi"
+                  required
+                  hide-details
+                  :items="sesiList"
+                  item-value="key"
+                  item-text="name"
+              >
+                <template v-slot:prepend-inner>
+                  <v-icon class="mr-5">mdi-clock-time-eight-outline</v-icon>
+                </template>
+              </v-select>
+
+            <v-card-actions class="pt-10">
+              <v-spacer></v-spacer>
+              <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="resetFilter">
+                Reset
+              </v-btn>
+              <v-btn color="primary" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="searchMeja" >
+                Submit
+              </v-btn>
+            </v-card-actions>
+          </v-container>
+
+        </v-card>
+      </v-dialog>
+
     </v-container>
   </div>
 </template>
@@ -283,7 +324,7 @@ export default {
       userRole:localStorage.getItem('role'),
       menu: false,
       filter: {},
-      loadingData: 'false',
+      loadingData: false,
       inputType: 'Tambah',
       load: false,
       snackbar: false,
@@ -292,6 +333,7 @@ export default {
       iconSnackbar:'',
       search: '',
       dialog: false,
+      dialogFilter : false,
       dialogConfirm: false,
       headers: [
         { text: "No. Meja", value: "no_meja", width: 150},
@@ -335,10 +377,23 @@ export default {
       return !(tgl !== null);
     },
     searchMeja(){
-      this.readDataMeja()
-      this.readDataMejaPerTanggal().then(()=>{
-        this.selectMeja()
-      })
+      this.loadingData = true
+      if (this.show.sesi !== null)
+      {
+        this.readDataMeja()
+        this.readDataMejaPerTanggal().then(()=>{
+          this.selectMeja()
+          this.loadingData = false
+        })
+        this.dialogFilter = false
+      }
+      else
+      {
+        this.error_message="Sesi dan Tgl Reservasi harus diisi";
+        this.color="red"
+        this.iconSnackbar ='mdi-alert-circle'
+        this.snackbar=true;
+      }
     },
     customSearch (value, search) {
       const data = value
@@ -484,6 +539,7 @@ export default {
         this.readData(); //mengambil data
         this.resetForm();
         this.inputType = 'Tambah';
+        this.loadingData = false
 
       }).catch(error => {
         this.error_message=error.response.data.message;
@@ -491,11 +547,13 @@ export default {
         this.iconSnackbar ='mdi-alert-circle'
         this.snackbar=true;
         this.load = false;
+        this.loadingData = false
       })
     },
 
     //hapus data meja
     deleteData() {
+      this.loadingData = true
       //mengahapus data
       var url = this.$api + '/meja/' + this.deleteId;
 
@@ -515,6 +573,7 @@ export default {
         this.resetForm();
         this.dialogConfirm = false;
         this.inputType = 'Tambah';
+        this.loadingData = false
       }).catch(error => {
         this.error_message=error.response.data.message;
         this.color="red"
@@ -522,6 +581,7 @@ export default {
         this.form.status_meja = null //reset form.status_meja
         this.snackbar=true;
         this.load = false;
+        this.loadingData = false
       })
     },
 
@@ -537,6 +597,7 @@ export default {
         this.form.status_meja = 'tidak tersedia'
       else if(item.status_meja === 'tidak tersedia')
         this.form.status_meja = 'tersedia'
+      this.loadingData = true
       this.update()
     },
 
@@ -544,6 +605,16 @@ export default {
       this.dialog = false
       this.inputType = 'Tambah';
       this.form.status_meja = null //reset form.status_meja
+    },
+
+    resetFilter(){
+      this.resetForm();
+      this.readDataMeja()
+      this.readDataMejaPerTanggal().then(()=>{
+        this.selectMeja()
+        this.loadingData = false
+      })
+      this.dialogFilter = false
     },
 
     cancel() {
@@ -558,6 +629,8 @@ export default {
       this.form = {
         status_meja: null,
       };
+      this.show.tgl_reservasi = null
+      this.show.sesi = null
     },
   },
 

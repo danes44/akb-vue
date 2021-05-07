@@ -25,7 +25,7 @@
 
         </v-card-title>
 
-        <v-data-table :headers="headers" :items="karyawans" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." sort-by="id_pegawai">
+        <v-data-table :headers="headers" :items="karyawans" :search="search" :loading="load" loading-text="Data sedang dimuat..." sort-by="id_pegawai">
           <template v-slot:item.nama_pegawai="{ item }">
             <v-list style="padding: 0;" dense id="list">
               <v-list-item class="pl-0">
@@ -201,7 +201,7 @@
               </v-col>
 
               <v-col class="">
-                <v-select
+                <v-autocomplete
                     outlined
                     rounded
                     class="rounded-lg"
@@ -218,7 +218,7 @@
                   <template v-slot:prepend-inner>
                     <v-icon class="mr-5">mdi-account-search-outline</v-icon>
                   </template>
-                </v-select>
+                </v-autocomplete>
               </v-col>
             </v-row>
 
@@ -402,7 +402,7 @@
             <v-btn color="grey darken-1" text @click="cancel" class="ml-3 pa-6 font-weight-bold">
               Cancel
             </v-btn>
-            <v-btn color="primary" elevation="0" @click="setForm" class="px-9 py-6 font-weight-bold">
+            <v-btn color="primary" elevation="0" @click="setForm" :loading="loadingData" class="px-9 py-6 font-weight-bold">
               Save
             </v-btn>
           </v-card-actions>
@@ -451,7 +451,7 @@
             <v-btn color="grey darken-1" text @click="cancel" class="ml-3 pa-6 font-weight-bold">
               Cancel
             </v-btn>
-            <v-btn color="primary" elevation="0" @click="updatePassword" class="px-9 py-6 font-weight-bold">
+            <v-btn color="primary" elevation="0" @click="updatePassword" :loading="loadingData" class="px-9 py-6 font-weight-bold">
               Save
             </v-btn>
           </v-card-actions>
@@ -459,7 +459,7 @@
       </v-dialog>
 
 <!--      snackbar section-->
-      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -471,7 +471,7 @@
         </ul>
       </v-snackbar>
 
-      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -503,7 +503,7 @@
             <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="close">
               Cancel
             </v-btn>
-            <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
+            <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" :loading="loadingData" elevation="0" dark @click="deleteData" >
               Delete
             </v-btn>
           </v-card-actions>
@@ -610,7 +610,7 @@
         menu: false,
         modal: false,
         menu2: false,
-        loadingData: 'false',
+        loadingData: false,
         inputType: 'Tambah',
         load: false,
         snackbar: false,
@@ -815,7 +815,7 @@
             'Authorization': 'Bearer ' + localStorage.getItem('token')
           }
         }).then(response => {
-          this.loadingData = false
+          this.load = false
           this.karyawans = response.data.data
         })
       },
@@ -827,7 +827,7 @@
             'Authorization': 'Bearer ' + localStorage.getItem('token')
           }
         }).then(response => {
-          this.loadingData = false
+          this.load = false
           this.roles = response.data.data
         })
       },
@@ -848,7 +848,7 @@
         console.log(this.form.tgl_gabung,'1')
         console.log(this.form.tgl_keluar,'2')
         var url = this.$api + '/pegawai/'
-        this.load = true
+        this.loadingData = true
         this.$http.post(url, this.karyawan, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -858,7 +858,7 @@
           this.color="green"
           this.iconSnackbar ='mdi-check-circle'
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
           this.close();
           this.readData(); //mengambil data
           this.resetForm();
@@ -868,7 +868,7 @@
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle'
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
         })
       },
 
@@ -887,7 +887,7 @@
         }
         var url = this.$api + '/pegawai/' + this.editId;
 
-        this.load = true
+        this.loadingData = true
 
         this.$http.put(url, newData, {
           headers: {
@@ -904,7 +904,7 @@
             localStorage.setItem("nama", this.form.nama_pegawai)
           }
           let emailUser = this.form.email
-          this.load = false;
+          this.loadingData = false;
           this.close();
           this.readData(); //mengambil data
           this.resetForm();
@@ -919,7 +919,7 @@
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle'
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
         })
       },
 
@@ -930,7 +930,7 @@
         }
         var url = this.$api + '/pegawai/' + this.editId;
 
-        this.load = true
+        this.loadingData = true
 
         this.$http.post(url, newData, {
           headers: {
@@ -941,7 +941,7 @@
           this.color="green"
           this.iconSnackbar ='mdi-check-circle'
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
           this.close();
           this.readData(); //mengambil data
           this.resetForm();
@@ -955,12 +955,13 @@
           this.iconSnackbar ='mdi-alert-circle'
           this.snackbar=true;
           this.form.nama_pegawai = null //reset form.nama_customer
-          this.load = false;
+          this.loadingData = false;
         })
       },
 
       //hapus data produk
       deleteData() {
+        this.loadingData = true
         //mengahapus data
         var url = this.$api + '/pegawai/' + this.deleteId;
 
@@ -974,7 +975,7 @@
           this.color="green"
           this.snackbar=true;
           this.iconSnackbar ='mdi-check-circle'
-          this.load = false;
+          this.loadingData = false;
           this.close();
           this.readData(); //mengambil data
           this.resetForm();
@@ -986,7 +987,7 @@
           this.iconSnackbar ='mdi-alert-circle'
           this.form.nama_pegawai = '' //reset
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
         })
       },
 
@@ -1003,17 +1004,20 @@
         this.form.no_telp_pegawai = item.no_telp_pegawai
         this.dialog = true;
       },
+
       changePasswordHandler(item){
         this.editId = item.id_pegawai;
         this.dialogUpdatePassword = true;
         this.is_updatePassword=true
         this.inputType = 'Ubah Password';
       },
+
       deleteHandler(item){
         this.deleteId = item.id_pegawai;
         this.form.nama_pegawai = item.nama_pegawai
         this.dialogConfirm = true;
       },
+
       close() {
         this.$v.$reset()
         this.dialog = false
@@ -1053,7 +1057,7 @@
     },
 
     mounted() {
-      this.loadingData = true
+      this.load = true
       this.readData()
       this.readDataRole()
     },

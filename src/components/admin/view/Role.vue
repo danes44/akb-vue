@@ -24,7 +24,7 @@
           </v-btn>
         </v-card-title>
 
-        <v-data-table :headers="headers" :items="roles" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." striped>
+        <v-data-table :headers="headers" :items="roles" :search="search" :loading="load" loading-text="Data sedang dimuat..." striped>
           <template v-slot:item.role_pegawai="{ item }">
             <span>
               {{ titleCase(item.role_pegawai) }}
@@ -103,7 +103,7 @@
               <v-btn color="grey darken-1" text @click="cancel" class=" pa-6 font-weight-bold">
                 Cancel
               </v-btn>
-              <v-btn color="primary" elevation="0" @click="setForm" class="ml-3 px-9 py-6 font-weight-bold">
+              <v-btn color="primary" elevation="0" @click="setForm" :loading="loadingData" class="ml-3 px-9 py-6 font-weight-bold">
                 Save
               </v-btn>
             </v-card-actions>
@@ -112,7 +112,7 @@
       </v-dialog>
 
 <!--      snackbar section-->
-      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -124,7 +124,7 @@
         </ul>
       </v-snackbar>
 
-      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -156,7 +156,7 @@
             <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="close">
               Cancel
             </v-btn>
-            <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
+            <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" :loading="loadingData" elevation="0" dark @click="deleteData" >
               Delete
             </v-btn>
           </v-card-actions>
@@ -186,7 +186,7 @@ export default {
       menu: false,
       modal: false,
       menu2: false,
-      loadingData: 'false',
+      loadingData: false,
       inputType: 'Tambah',
       load: false,
       snackbar: false,
@@ -261,7 +261,7 @@ export default {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
         }
       }).then(response => {
-        this.loadingData = false
+        this.load = false
         this.roles = response.data.data
       })
     },
@@ -271,7 +271,7 @@ export default {
       this.role.append('role_pegawai', this.form.role_pegawai);
 
       var url = this.$api + '/role/'
-      this.load = true
+      this.loadingData = true
       this.$http.post(url, this.role, {
         headers: {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -281,7 +281,7 @@ export default {
         this.color="green"
         this.iconSnackbar ='mdi-check-circle'
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -291,7 +291,7 @@ export default {
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
       })
     },
 
@@ -302,7 +302,7 @@ export default {
       }
       var url = this.$api + '/role/' + this.editId;
 
-      this.load = true
+      this.loadingData = true
 
       this.$http.put(url, newData, {
         headers: {
@@ -313,7 +313,7 @@ export default {
         this.color="green"
         this.iconSnackbar ='mdi-check-circle'
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -330,6 +330,7 @@ export default {
 
     //hapus data role
     deleteData() {
+      this.loadingData = true
       //mengahapus data
       var url = this.$api + '/role/' + this.deleteId;
 
@@ -343,7 +344,7 @@ export default {
         this.color="green"
         this.iconSnackbar ='mdi-check-circle'
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -355,7 +356,7 @@ export default {
         this.iconSnackbar ='mdi-alert-circle'
         this.form.role_pegawai = null //reset form.role_pegawai
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
       })
     },
 
@@ -398,7 +399,7 @@ export default {
   },
 
   mounted() {
-    this.loadingData = true
+    this.load = true
     this.readData()
   },
 }

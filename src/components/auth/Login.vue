@@ -50,6 +50,9 @@
                         v-model="password"
                         v-on:keydown.enter="submit"
                     ></b-form-input>
+                    <b-form-text id="password-help-block">
+                      Apabila <b>lupa password</b> silakan menghubungi Operasional Manager.
+                    </b-form-text>
                   </b-input-group>
                 </b-form-row>
 
@@ -58,9 +61,12 @@
                       class="py-2 font-weight-bold border-0"
                       block
                       @click="submit"
+                      :disabled="loading"
                       style="background-color: #111111; color: white; border-radius: 0.5rem"
-                  >Sign In</b-button
                   >
+                    <b-spinner v-show="loading" small label="loading.."></b-spinner>
+                    <span v-show="!loading">Sign In</span>
+                    </b-button>
                 </b-form-row>
 
               </b-form>
@@ -97,6 +103,7 @@
         })
       },
       submit() {
+        this.loading = true
         this.$http
           .post(this.$api + "/login", {
             email: this.email,
@@ -115,7 +122,7 @@
             setTimeout(() => this.$router.push({
               name: "dashboard",
             }), 1000);
-
+            this.loading = false
 
           })
           .catch((error) => {
@@ -124,6 +131,7 @@
             this.toast('Failed','danger',this.error_message);
             localStorage.removeItem("token");
             this.load = false;
+            this.loading = false
           });
 
       },

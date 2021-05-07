@@ -186,7 +186,7 @@ const router = new VueRouter({
           meta: {title: 'Transaksi - AKB'},
           component: importComponent('admin/view/Transaksi'),
           beforeEnter:((to,from,next)=>{
-            if(localStorage.getItem('role')==="Operasional Manager" ||  localStorage.getItem('role')==="Waiter dan Kasir")
+            if(localStorage.getItem('role')==="Operasional Manager" ||  localStorage.getItem('role')==="Kasir" ||  localStorage.getItem('role')==="Waiter dan Kasir")
               next()
             else {
               next({

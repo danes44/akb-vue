@@ -25,7 +25,7 @@
 
         </v-card-title>
 
-        <v-data-table :headers="headers" :items="reservasis" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." sort-by="id_reservasi">
+        <v-data-table :headers="headers" :items="reservasis" :search="search" :loading="load" loading-text="Data sedang dimuat..." sort-by="id_reservasi">
           <template v-slot:item.nama_customer="{ item }">
             <span>{{ titleCase(item.nama_customer) }}</span>
           </template>
@@ -423,7 +423,7 @@
                     Cancel
                   </v-btn>
 
-                  <v-btn class="px-9 py-6 font-weight-bold" color="primary" elevation="0" @click="nextStep(1,null)">
+                  <v-btn class="px-9 py-6 font-weight-bold" color="primary" elevation="0" :loading="loadingData" @click="nextStep(1,null)">
                     Continue
                   </v-btn>
                 </v-card-actions>
@@ -456,7 +456,7 @@
                             {{ titleCase(item.status_meja) }}
                           </v-card-subtitle>
                         </v-card>
-                        <v-card elevation="0" v-else color="red" dark min-width="150px" @click="nextStep(2,item)">
+                        <v-card elevation="0" v-else color="red" dark min-width="150px">
                           <v-card-title class="subheading font-weight-bold">
                             {{ item.no_meja }}
                           </v-card-title>
@@ -468,12 +468,12 @@
                     </v-row>
                 </v-card>
                 <v-card-actions class="pt-15">
-                  <span>Meja terpilih : <b>{{ this.form.no_meja }}</b></span>
+                  <span>Meja terpilih : <b v-show="this.form.no_meja===null">-</b><b>{{ this.form.no_meja }}</b></span>
                   <v-spacer></v-spacer>
                   <v-btn class="ml-3 pa-6 font-weight-bold" color="grey darken-1" text @click="e1=1">
                     Back
                   </v-btn>
-                  <v-btn class="px-9 py-6 font-weight-bold" color="primary" elevation="0" @click="nextStep(2)">
+                  <v-btn class="px-9 py-6 font-weight-bold" color="primary" elevation="0" :loading="loadingData" @click="nextStep(2)">
                     Submit
                   </v-btn>
                 </v-card-actions>
@@ -487,7 +487,7 @@
       </v-dialog>
 
 <!--      snackbar section-->
-      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -499,7 +499,7 @@
         </ul>
       </v-snackbar>
 
-      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -532,7 +532,7 @@
             <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="close">
               Cancel
             </v-btn>
-            <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
+            <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" :loading="loadingData" elevation="0" dark @click="deleteData" >
               Delete
             </v-btn>
           </v-card-actions>
@@ -573,7 +573,7 @@
               </v-card-text>
             </div>
             <v-card-actions class="pt-10">
-              <v-btn color="secondary" class="mx-3 mb-3 px-5 py-3 font-weight-bold" elevation="0" dark text @click="printPdf">
+              <v-btn color="secondary" class="mx-3 mb-3 px-5 py-3 font-weight-bold" :loading="loadingData" elevation="0" dark text @click="printPdf">
                 Print PDF
               </v-btn>
               <v-spacer></v-spacer>
@@ -651,12 +651,12 @@
         // ],
         e1: 1,
         idMejaDelete: null,
-        printedBy:'',
+        printedBy:localStorage.getItem('nama'),
         qrText: '',
         menu: false,
         modal: false,
         menu2: false,
-        loadingData: 'false',
+        loadingData: false,
         inputType: 'Tambah',
         load: false,
         snackbar: false,
@@ -674,12 +674,12 @@
             align: "start",
             value: "nama_customer",width: 140 },
           { text: "No. Meja", value: "no_meja", sortable: false,width: 100,filterable: false},
-          { text: "Tgl Reservasi", value: "tgl_reservasi",width: 120},
-          { text: "Sesi", value:"sesi",width: 80 },
+          { text: "Tgl Reservasi", value: "tgl_reservasi",width: 120,filterable: false},
+          { text: "Sesi", value:"sesi",width: 80,filterable: false },
           { text: "Tgl Pesan", value: "created_at",width: 140},
           { text: "Status", value: "status_reservasi",width: 110},
-          { text: "Waiter", value: "nama_pegawai",width: 100, sortable: false,filterable: false  },
-          { value: 'actions', sortable: false, width:100 },
+          { text: "Waiter", value: "nama_pegawai",width: 100, sortable: false  },
+          { value: 'actions', sortable: false, width:100,filterable: false },
         ],
         reservasi: new FormData,
         meja: new FormData,
@@ -763,6 +763,7 @@
           this.$v.$touch()
           console.log(this.$v)
           if(!this.$v.$error) {
+            this.loadingData = true
             this.readDataMeja()
             this.readDataMejaPerTanggal().then(() => {
               this.selectMeja()
@@ -836,7 +837,7 @@
             'Authorization': 'Bearer ' + localStorage.getItem('token')
           }
         }).then(response => {
-          this.loadingData = false
+          this.load = false
           this.reservasis = response.data.data
         })
       },
@@ -848,7 +849,7 @@
             'Authorization': 'Bearer ' + localStorage.getItem('token')
           }
         }).then(response => {
-          this.loadingData = false
+          this.load = false
           this.customers = response.data.data
         })
       },
@@ -860,7 +861,7 @@
             'Authorization': 'Bearer ' + localStorage.getItem('token')
           }
         }).then(response => {
-          this.loadingData = false
+          this.load = false
           this.pegawais = response.data.data
         })
       },
@@ -890,6 +891,7 @@
           }
         }
         this.e1=2
+        this.loadingData = false
       },
 
       async readDataMejaPerTanggal(){
@@ -919,7 +921,7 @@
         this.reservasi.append('status_reservasi', 'non aktif');
 
         var url = this.$api + '/reservasi/'
-        this.load = true
+        this.loadingData = true
         this.$http.post(url, this.reservasi, {
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -931,7 +933,7 @@
           this.color="green"
           this.iconSnackbar ='mdi-check-circle-outline'
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
           this.close();
           this.readData(); //mengambil data
           this.resetForm();
@@ -941,7 +943,7 @@
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle-outline'
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
         })
       },
 
@@ -975,7 +977,7 @@
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle-outline'
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
         })
       },
 
@@ -986,7 +988,7 @@
         }
         var url = this.$api + '/meja/' + id;
 
-        this.load = true
+        this.loadingData = true
 
         this.$http.put(url, newData, {
           headers: {
@@ -998,7 +1000,7 @@
           this.color="green"
           this.iconSnackbar ='mdi-check-circle-outline'
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
           this.close();
           this.readData(); //mengambil data
           this.resetForm();
@@ -1009,7 +1011,7 @@
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle-outline'
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
         })
       },
 
@@ -1024,7 +1026,7 @@
         }
         var url = this.$api + '/reservasi/' + this.editId;
 
-        this.load = true
+        this.loadingData = true
 
         this.$http.put(url, newData, {
           headers: {
@@ -1036,7 +1038,7 @@
           this.color="green"
           this.iconSnackbar ='mdi-check-circle-outline'
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
           this.close();
           this.readData(); //mengambil data
           this.resetForm();
@@ -1047,12 +1049,13 @@
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle-outline'
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
         })
       },
 
       //hapus data produk
       deleteData() {
+        this.loadingData = true
         //mengahapus data
         var url = this.$api + '/reservasi/' + this.deleteId;
 
@@ -1067,7 +1070,7 @@
           this.color="green"
           this.snackbar=true;
           this.iconSnackbar ='mdi-check-circle-outline'
-          this.load = false;
+          this.loadingData = false;
           this.close();
           this.readData(); //mengambil data
           this.resetForm();
@@ -1078,7 +1081,7 @@
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle-outline'
           this.snackbar=true;
-          this.load = false;
+          this.loadingData = false;
         })
       },
 
@@ -1104,13 +1107,14 @@
       printHandler(item){
         this.editId = item.id_reservasi
         this.qrText = item.id_reservasi + ';' + item.nama_customer + ';' + item.no_meja + ';' + moment(new Date()).format('DD-MM-YYYY HH:mm')
-        let tableWaiter= this.pegawais.find(pegawais => pegawais.id_pegawai === item.id_waiter)
-        console.log(tableWaiter.nama_pegawai)
-        this.printedBy = tableWaiter.nama_pegawai
+        // let tableWaiter= this.pegawais.find(pegawais => pegawais.id_pegawai === item.id_waiter)
+        // console.log(tableWaiter.nama_pegawai)
+        // this.printedBy = tableWaiter.nama_pegawai
         this.dialogPrint = true;
       },
       //fungsi download pdf
       printPdf(){
+        this.loadingData = true
         var canvas = document.getElementById('testHtml')
         html2canvas(canvas).then(function (canvas){
           var imgData = canvas.toDataURL('image/png')
@@ -1123,8 +1127,10 @@
             y:8,
             compression:'NONE'})
           // doc.addImage(imgData,'PNG',150,150)
-          doc.save('test.pdf')
+          doc.save('QR Code.pdf')
         })
+        setTimeout(() => this.loadingData = false, 3000);
+
       },
       close() {
         this.$v.$reset()
@@ -1157,7 +1163,7 @@
     },
 
     mounted() {
-      this.loadingData = true
+      this.load = true
       this.readData()
       this.readDataCustomer()
       this.readDataMeja()

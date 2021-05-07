@@ -16,7 +16,7 @@
               class="mt-6 ml-3 mr-8 mr-md-16 mr-xl-16 rounded-lg"
           ></v-text-field>
           <v-spacer></v-spacer>
-          <v-btn color="#37A37B" @click="dialog = true" dark class="mr-3 px-4 py-5 rounded-lg font-weight-bold" elevation="0" style="font-size: 14px">
+          <v-btn color="#37A37B" @click="dialog = true"  dark class="mr-3 px-4 py-5 rounded-lg font-weight-bold" elevation="0" style="font-size: 14px">
             <v-icon class="mr-3 ">
               mdi-plus
             </v-icon>
@@ -25,7 +25,7 @@
 
         </v-card-title>
 
-        <v-data-table :headers="headers" :items="customers" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." striped>
+        <v-data-table :headers="headers" :items="customers" :search="search" :loading="load" loading-text="Data sedang dimuat..." striped>
           <template v-slot:item.nama_customer="{ item }">
             {{ titleCase(item.nama_customer) }}
           </template>
@@ -161,7 +161,7 @@
             <v-btn color="grey darken-1" text @click="cancel" class=" pa-6 font-weight-bold">
               Cancel
             </v-btn>
-            <v-btn color="primary" elevation="0" @click="setForm" class="ml-3 px-9 py-6 font-weight-bold">
+            <v-btn color="primary" elevation="0" @click="setForm" :loading="loadingData" class="ml-3 px-9 py-6 font-weight-bold">
               Save
             </v-btn>
           </v-card-actions>
@@ -169,7 +169,7 @@
       </v-dialog>
 
 <!--      snackbar section-->
-      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -181,7 +181,7 @@
         </ul>
       </v-snackbar>
 
-      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -213,7 +213,7 @@
             <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="close">
               Cancel
             </v-btn>
-            <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
+            <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" :loading="loadingData" elevation="0" dark @click="deleteData" >
               Delete
             </v-btn>
           </v-card-actions>
@@ -251,7 +251,7 @@ export default {
       menu: false,
       modal: false,
       menu2: false,
-      loadingData: 'false',
+      loadingData: false,
       inputType: 'Tambah',
       load: false,
       snackbar: false,
@@ -347,19 +347,19 @@ export default {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
         }
       }).then(response => {
-        this.loadingData = false
+        this.load = false
         this.customers = response.data.data
       })
     },
 
     //simpan data customer
     save() {
+      this.loadingData = true
       this.customer.append('nama_customer', this.form.nama_customer);
       this.customer.append('no_telp', this.form.no_telp);
       this.customer.append('email_customer', this.form.email_customer);
 
       var url = this.$api + '/customer/'
-      this.load = true
       this.$http.post(url, this.customer, {
         headers: {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -369,7 +369,7 @@ export default {
         this.color="green"
         this.iconSnackbar ='mdi-check-circle'
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -379,12 +379,13 @@ export default {
         this.iconSnackbar ='mdi-alert-circle'
         this.color="red"
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
       })
     },
 
     //ubah data customer
     update() {
+      this.loadingData = true
       let newData = {
         nama_customer: this.form.nama_customer,
         email_customer: this.form.email_customer,
@@ -392,7 +393,6 @@ export default {
       }
       var url = this.$api + '/customer/' + this.editId;
 
-      this.load = true
 
       this.$http.put(url, newData, {
         headers: {
@@ -403,7 +403,7 @@ export default {
         this.color="green"
         this.snackbar=true;
         this.iconSnackbar ='mdi-check-circle'
-        this.load = false;
+        this.loadingData = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -414,12 +414,13 @@ export default {
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
       })
     },
 
     //hapus data produk
     deleteData() {
+      this.loadingData = true
       //mengahapus data
       var url = this.$api + '/customer/' + this.deleteId;
 
@@ -433,7 +434,7 @@ export default {
         this.color="green"
         this.snackbar=true;
         this.iconSnackbar ='mdi-check-circle'
-        this.load = false;
+        this.loadingData = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -445,7 +446,7 @@ export default {
         this.iconSnackbar ='mdi-alert-circle'
         this.form.nama_customer = null //reset form.nama_customer
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
       })
     },
 
@@ -492,7 +493,7 @@ export default {
   },
 
   mounted() {
-    this.loadingData = true
+    this.load = true
     this.readData()
   },
 }

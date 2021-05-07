@@ -13,8 +13,17 @@
               single-line
               dense
               style="max-width: 400px!important;"
-              class="mt-6 ml-3 mr-8 mr-md-16 mr-xl-16 rounded-lg"
+              class="mt-6 ml-3 rounded-lg"
           ></v-text-field>
+          <v-switch
+              class="ml-6 mr-8 mr-md-16 mr-xl-16"
+              v-model="switchDataKosong"
+              inset
+          >
+            <template v-slot:label style="margin-bottom: 0!important;">
+              <span class="mb-n2">Tampil Bahan Kosong</span>
+            </template>
+          </v-switch>
           <v-spacer></v-spacer>
           <v-btn color="#37A37B" @click="dialog = true" dark class="mr-3 px-4 py-5 rounded-lg font-weight-bold" elevation="0" style="font-size: 14px">
             <v-icon class="mr-3 ">
@@ -24,7 +33,68 @@
           </v-btn>
         </v-card-title>
 
-        <v-data-table :headers="headers" :items="bahans" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." striped>
+        <v-data-table v-if="switchDataKosong" :headers="headers" :items="bahanKosong" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." >
+          <template v-slot:item.jumlah_stok="{ item }">
+            <span>
+              {{ formatPrice(item.jumlah_stok) }}
+            </span>
+          </template>
+
+          <template v-slot:item.jumlah_per_sajian="{ item }">
+            <span>
+              {{ formatPrice(item.jumlah_per_sajian) }} {{ item.unit }}
+            </span>
+          </template>
+
+          <template v-slot:item.ketersediaan="{ item }">
+            <v-chip v-if="item.ketersediaan" color="accent" outlined>Tersedia</v-chip>
+            <v-chip v-else color="red" outlined>Tidak</v-chip>
+          </template>
+
+          <template v-slot:[`item.actions`]="{ item }">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    class="mr-2"
+                    rounded
+                    color="#2196F3"
+                    x-small
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="editHandler(item)"
+                >
+                  <v-icon>
+                    mdi-pencil
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Edit Data</span>
+            </v-tooltip>
+
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    rounded
+                    color="red"
+                    x-small
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="deleteHandler(item)"
+                >
+                  <v-icon>
+                    mdi-trash-can
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Delete Data</span>
+            </v-tooltip>
+          </template>
+
+        </v-data-table>
+
+        <v-data-table v-else :headers="headers" :items="bahans" :search="search" :loading="loadingData" loading-text="Data sedang dimuat...">
           <template v-slot:item.jumlah_stok="{ item }">
             <span>
               {{ formatPrice(item.jumlah_stok) }}
@@ -93,6 +163,7 @@
           </v-card-title>
 
           <v-card-text class="pt-7">
+<!--            <label>Nama Bahan</label>-->
             <v-text-field
                 outlined
                 rounded
@@ -177,7 +248,10 @@
             <v-btn color="grey darken-1" text @click="cancel" class=" pa-6 font-weight-bold">
               Cancel
             </v-btn>
-            <v-btn color="primary" elevation="0" @click="setForm" class="ml-3 px-9 py-6 font-weight-bold">
+            <v-btn color="primary" elevation="0" @click="setForm"
+                   class="ml-3 px-9 py-6 font-weight-bold"
+                   :loading="loading"
+                   :disabled="loading">
               Save
             </v-btn>
           </v-card-actions>
@@ -185,7 +259,7 @@
       </v-dialog>
 
 <!--      snackbar section -->
-      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -197,7 +271,7 @@
         </ul>
       </v-snackbar>
 
-      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -229,7 +303,7 @@
           <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="close">
             Cancel
           </v-btn>
-          <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
+          <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" :loading="loading" elevation="0" dark @click="deleteData" >
             Delete
           </v-btn>
         </v-card-actions>
@@ -270,14 +344,16 @@ export default {
       menu: false,
       modal: false,
       menu2: false,
-      loadingData: 'false',
+      loadingData: false,
       inputType: 'Tambah',
       load: false,
+      loading: false,
       snackbar: false,
       error_message: '',
       color: '',
       iconSnackbar:'',
       search: null,
+      switchDataKosong: false,
       dialog: false,
       dialogConfirm: false,
       headers: [
@@ -293,6 +369,7 @@ export default {
       ],
       bahan: new FormData,
       bahans: [],
+      bahanKosong: [],
       menus:[],
       form: {
         nama_bahan: '',
@@ -373,10 +450,14 @@ export default {
       // console.log(this.$v)
       if(!this.$v.$error) {
         console.log('2')
-        if (this.inputType === 'Tambah')
+        if (this.inputType === 'Tambah') {
+          this.loading = true
           this.save()
-        else
+        }
+        else {
+          this.loading = true
           this.update()
+        }
       }
     },
 
@@ -390,6 +471,19 @@ export default {
       }).then(response => {
         this.loadingData = false
         this.bahans = response.data.data
+      })
+    },
+
+    //read data product
+    readDataBahanKosong() {
+      var url = this.$api + '/bahan/kosong'
+      this.$http.get(url, {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      }).then(response => {
+        this.loadingData = false
+        this.bahanKosong = response.data.data
       })
     },
 
@@ -418,7 +512,6 @@ export default {
         this.bahan.append('ketersediaan', 1)
 
       var url = this.$api + '/bahan/'
-      this.load = true
       this.$http.post(url, this.bahan, {
         headers: {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -429,7 +522,7 @@ export default {
         this.color="green"
         this.iconSnackbar ='mdi-check-circle'
         this.snackbar=true;
-        this.load = false;
+        this.loading = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -440,7 +533,7 @@ export default {
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
         this.snackbar=true;
-        this.load = false;
+        this.loading = false;
       })
     },
 
@@ -460,8 +553,6 @@ export default {
       console.log(this.form.ketersediaan)
       var url = this.$api + '/bahan/' + this.editId;
 
-      this.load = true
-
       this.$http.put(url, newData, {
         headers: {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -472,7 +563,7 @@ export default {
         this.color="green"
         this.iconSnackbar ='mdi-check-circle'
         this.snackbar=true;
-        this.load = false;
+        this.loading = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -483,7 +574,7 @@ export default {
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle'
         this.snackbar=true;
-        this.load = false;
+        this.loading = false;
       })
     },
 
@@ -511,8 +602,6 @@ export default {
 
       var url = this.$api + '/menu/' + this.editId;
 
-      this.load = true
-
       this.$http.put(url, newData, {
         headers: {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -523,7 +612,7 @@ export default {
         this.color="green"
         this.iconSnackbar ='mdi-check-circle-outline'
         this.snackbar=true;
-        this.load = false;
+        this.loading = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -534,12 +623,13 @@ export default {
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle-outline'
         this.snackbar=true;
-        this.load = false;
+        this.loading = false;
       })
     },
 
     //hapus data bahan
     deleteData() {
+      this.loading = true
       //mengahapus data
       var url = this.$api + '/bahan/' + this.deleteId;
 
@@ -553,7 +643,7 @@ export default {
         this.color="green"
         this.iconSnackbar ='mdi-check-circle'
         this.snackbar=true;
-        this.load = false;
+        this.loading = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -565,7 +655,7 @@ export default {
         this.iconSnackbar ='mdi-alert-circle'
         this.form.nama_bahan = null //reset form.nama_bahan
         this.snackbar=true;
-        this.load = false;
+        this.loading = false;
       })
     },
 
@@ -616,11 +706,13 @@ export default {
   mounted() {
     this.loadingData = true
     this.readData()
-    this.readDataMenu()
+    this.readDataBahanKosong()
   },
 }
 </script>
 
 <style scoped>
-
+  label.v-label.theme--light {
+    margin-bottom: 0!important;
+  }
 </style>

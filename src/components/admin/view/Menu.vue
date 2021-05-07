@@ -29,7 +29,7 @@
                       :headers="headersManager"
                       :items="menus"
                       :search="search"
-                      :loading="loadingData"
+                      :loading="load"
                       loading-text="Data sedang dimuat..." sort-by="id_menu">
           <template v-slot:item.nama_menu="{ item }">
             <v-list style="padding: 0;" dense class="list">
@@ -111,7 +111,7 @@
                       :headers="headers"
                       :items="menus"
                       :search="search"
-                      :loading="loadingData"
+                      :loading="load"
                       loading-text="Data sedang dimuat..." sort-by="id_menu">
           <template v-slot:item.nama_menu="{ item }">
             <v-list style="padding: 0;" dense class="list">
@@ -308,14 +308,18 @@
                 >
                   <template v-slot:prepend-inner>
                     <v-icon class="mr-5">mdi-cash</v-icon>
+                    <span style="line-height: 1.375rem !important;">Rp. </span>
                   </template>
                 </v-text-field>
               </v-col>
             </v-row>
 
-            <v-row class="pt-0 mt-0" v-if="inputType==='Ubah' || this.tempGambar!=null">
-              <v-col cols="4" class="mx-auto">
-                <v-img class="mx-auto" :src="'http://localhost:8000'+this.tempGambar" max-width="200" max-height="200"></v-img>
+            <v-row class="pt-0 mt-0" v-if="inputType==='Ubah'">
+              <v-col cols="4" class="mx-auto" v-if="this.tempGambar !=null">
+                <v-img class="mx-auto rounded-lg" :src="'http://localhost:8000'+this.tempGambar" max-width="200" max-height="200"></v-img>
+              </v-col>
+              <v-col cols="4" class="mx-auto" v-else>
+                <v-img class="mx-auto rounded-lg" :src="require('../../../assets/dummy.png')" max-width="200" max-height="200" ></v-img>
               </v-col>
               <v-col cols="8">
                 <v-file-input
@@ -362,7 +366,7 @@
             <v-btn color="grey darken-1" text @click="cancel" class="ml-3 pa-6 font-weight-bold">
               Cancel
             </v-btn>
-            <v-btn color="primary" elevation="0" @click="setForm" class="px-9 py-6 font-weight-bold">
+            <v-btn color="primary" elevation="0" @click="setForm" :loading="loadingData" class="px-9 py-6 font-weight-bold">
               Save
             </v-btn>
           </v-card-actions>
@@ -370,7 +374,7 @@
       </v-dialog>
 
 <!--      snackbar section-->
-      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -382,7 +386,7 @@
         </ul>
       </v-snackbar>
 
-      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right bottom >
+      <v-snackbar v-else multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
           {{iconSnackbar}}
         </v-icon>
@@ -414,7 +418,7 @@
             <v-btn color="grey darken-1" class="mb-3 pa-6 font-weight-bold"  text @click="close">
               Cancel
             </v-btn>
-            <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" elevation="0" dark @click="deleteData" >
+            <v-btn color="red" class="mx-3 mb-3 px-9 py-6 font-weight-bold" :loading="loadingData" elevation="0" dark @click="deleteData" >
               Delete
             </v-btn>
           </v-card-actions>
@@ -462,7 +466,7 @@ export default {
       //   value => !value || value.size < 5000000 || 'Harus dalam format .jpg, .png, atau .bmp dibawah 5 MB',
       // ],
       userRole:localStorage.getItem('role'),
-      loadingData: 'false',
+      loadingData: false,
       inputType: 'Tambah',
       load: false,
       snackbar: false,
@@ -631,7 +635,7 @@ export default {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
         }
       }).then(response => {
-        this.loadingData = false
+        this.load = false
         this.menus = response.data.data
         console.log(this.menus)
       })
@@ -644,7 +648,7 @@ export default {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
         }
       }).then(response => {
-        this.loadingData = false
+        this.load = false
         this.bahans = response.data.data
       })
     },
@@ -664,7 +668,6 @@ export default {
         this.color="green"
         this.iconSnackbar ='mdi-check-circle-outline'
         this.snackbar=true;
-        this.load = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -674,12 +677,12 @@ export default {
         // this.color="red"
         // this.iconSnackbar ='mdi-alert-circle-outline'
         this.snackbar=true;
-        this.load = false;
       })
     },
 
     //simpan data produk
     save() {
+      this.loadingData = true
       console.log(this.form.id_bahan)
       this.menu.append('id_bahan', this.form.id_bahan);
       this.menu.append('nama_menu', this.form.nama_menu);
@@ -700,7 +703,7 @@ export default {
         this.color="green"
         this.iconSnackbar ='mdi-check-circle-outline'
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
         console.log('sampe sini')
         this.close();
         this.readData(); //mengambil data
@@ -711,7 +714,7 @@ export default {
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle-outline'
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
       })
     },
 
@@ -727,7 +730,7 @@ export default {
       }
       var url = this.$api + '/menu/' + this.editId;
 
-      this.load = true
+      this.loadingData = true
 
       this.$http.put(url, newData, {
         headers: {
@@ -742,7 +745,7 @@ export default {
         this.color="green"
         this.iconSnackbar ='mdi-check-circle-outline'
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
 
         console.log(this.form.id_bahan)
         this.close();
@@ -755,12 +758,13 @@ export default {
         this.color="red"
         this.iconSnackbar ='mdi-alert-circle-outline'
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
       })
     },
 
     //hapus data produk
     deleteData() {
+      this.loadingData = true
       //mengahapus data
       var url = this.$api + '/menu/' + this.deleteId;
 
@@ -774,7 +778,7 @@ export default {
         this.color="green"
         this.snackbar=true;
         this.iconSnackbar ='mdi-check-circle-outline'
-        this.load = false;
+        this.loadingData = false;
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
@@ -786,7 +790,7 @@ export default {
         this.iconSnackbar ='mdi-alert-circle-outline'
         this.form.nama_menu = '' //reset form.nama_menu
         this.snackbar=true;
-        this.load = false;
+        this.loadingData = false;
       })
     },
 
@@ -844,10 +848,9 @@ export default {
   },
 
   mounted() {
-    this.loadingData = true
+    this.load = true
     this.readData()
     this.readDataBahan()
-    console.log('menus '+this.menus)
   },
 }
 </script>
