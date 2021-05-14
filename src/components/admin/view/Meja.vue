@@ -35,9 +35,9 @@
             <span>Search Filter</span>
           </v-tooltip>
 
-          <div v-show="this.show.sesi!==null && this.show.tgl_reservasi!==null">
+          <div v-show="this.show.sesi!=='' && this.show.tgl_reservasi!==null">
             <v-chip outlined class="mr-3">{{ this.show.tgl_reservasi }}</v-chip>
-            <v-chip outlined >{{ titleCase(this.show.sesi) }}</v-chip>
+            <v-chip outlined >{{ titleCaseSesi(this.show.sesi) }}</v-chip>
           </div>
 
           <v-spacer></v-spacer>
@@ -243,7 +243,7 @@
               <v-spacer></v-spacer>
               <v-btn
                   icon
-                  @click="dialogFilter = false"
+                  @click="close"
               >
                 <v-icon>mdi-close</v-icon>
               </v-btn>
@@ -360,7 +360,7 @@ export default {
       },
       show: {
         tgl_reservasi: null,
-        sesi: null,
+        sesi: '',
       },
       sesiList: [
         { key: 'lunch', name: 'Lunch'},
@@ -384,7 +384,7 @@ export default {
     },
     searchMeja(){
       this.loadingData = true
-      if (this.show.sesi !== null)
+      if (this.show.sesi !== '' && this.show.sesi !== null && this.show.tgl_reservasi!==null)
       {
         this.readDataMeja()
         this.readDataMejaPerTanggal().then(()=>{
@@ -425,6 +425,22 @@ export default {
       }
       // Directly return the joined string
       return splitStr.join(' ');
+    },
+
+    // function buat uppercase each word
+    titleCaseSesi(str) {
+      if (str!==null) {
+        var splitStr = str.toLowerCase().split(' ');
+        for (var i = 0; i < splitStr.length; i++) {
+          // You do not need to check if i is larger than splitStr length, as your for does that for you
+          // Assign it back to the array
+          splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+        }
+        // Directly return the joined string
+        return splitStr.join(' ');
+      }
+      else
+        return str
     },
 
     // submit form
@@ -608,6 +624,10 @@ export default {
     },
 
     close() {
+      this.dialogFilter = false
+      if(this.show.sesi === '' || this.show.tgl_reservasi===null) {
+        this.resetFilter()
+      }
       this.dialog = false
       this.inputType = 'Tambah';
       this.form.status_meja = null //reset form.status_meja
@@ -636,7 +656,7 @@ export default {
         status_meja: null,
       };
       this.show.tgl_reservasi = null
-      this.show.sesi = null
+      this.show.sesi = ''
     },
   },
 

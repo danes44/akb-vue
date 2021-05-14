@@ -47,10 +47,10 @@
           </template>
 
           <template v-slot:item.sesi="{ item }">
-            <v-chip v-if="item.sesi==='lunch'" outlined color="orange darken-4">
+            <v-chip v-if="item.sesi==='lunch'" dark color="orange darken-4">
               <span>{{ titleCase(item.sesi) }}</span>
             </v-chip>
-            <v-chip v-else outlined color="blue darken-2">
+            <v-chip v-else dark color="blue darken-2">
               <span>{{ titleCase(item.sesi) }}</span>
             </v-chip>
           </template>

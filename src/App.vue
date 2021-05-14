@@ -56,7 +56,7 @@ a:hover{
 }
 
 ::-webkit-scrollbar {
-  width: 0.3rem;
+  width: 0.35rem;
   scrollbar-width: thin;
   -webkit-box-shadow: none !important;
 }
@@ -72,7 +72,7 @@ a:hover{
 }
 
 ::-webkit-scrollbar-track {
-  background-color: #d7d7d7;
+  background-color: #a7a7a7;
   -webkit-box-shadow: none !important;
 }
 

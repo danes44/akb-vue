@@ -36,7 +36,7 @@
         <v-data-table v-if="switchDataKosong" :headers="headers" :items="bahanKosong" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." >
           <template v-slot:item.jumlah_stok="{ item }">
             <span>
-              {{ formatPrice(item.jumlah_stok) }}
+              {{ formatPrice(item.jumlah_stok) }} {{ item.unit }}
             </span>
           </template>
 
@@ -52,6 +52,46 @@
           </template>
 
           <template v-slot:[`item.actions`]="{ item }">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    class="mr-2"
+                    rounded
+                    color="#37A37B"
+                    x-small
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="stokMasukHandler(item)"
+                >
+                  <v-icon>
+                    mdi-basket-plus
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Tambah Stok</span>
+            </v-tooltip>
+
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    class="mr-2"
+                    rounded
+                    color="red"
+                    x-small
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="stokKeluarHandler(item)"
+                >
+                  <v-icon>
+                    mdi-basket-minus
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Buang Bahan</span>
+            </v-tooltip>
+
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
@@ -97,7 +137,7 @@
         <v-data-table v-else :headers="headers" :items="bahans" :search="search" :loading="loadingData" loading-text="Data sedang dimuat...">
           <template v-slot:item.jumlah_stok="{ item }">
             <span>
-              {{ formatPrice(item.jumlah_stok) }}
+              {{ formatPrice(item.jumlah_stok) }} {{ item.unit }}
             </span>
           </template>
 
@@ -113,6 +153,46 @@
           </template>
 
           <template v-slot:[`item.actions`]="{ item }">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    class="mr-2"
+                    rounded
+                    color="#37A37B"
+                    x-small
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="stokMasukHandler(item)"
+                >
+                  <v-icon>
+                    mdi-basket-plus
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Tambah Stok</span>
+            </v-tooltip>
+
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    class="mr-2"
+                    rounded
+                    color="red"
+                    x-small
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="stokKeluarHandler(item)"
+                >
+                  <v-icon>
+                    mdi-basket-minus
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Buang Bahan</span>
+            </v-tooltip>
+
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
@@ -258,6 +338,93 @@
         </v-card>
       </v-dialog>
 
+<!--      dialog form stok masuk dan stok keluar-->
+      <v-dialog v-model="dialogStok" persistent max-width="600px">
+        <v-card class="px-5 py-5">
+          <v-card-title>
+            <span class="headline font-weight-bold">{{ formTitle }} Bahan</span>
+          </v-card-title>
+
+          <v-card-text v-if="inputType==='Tambah Stok'" class="pt-7">
+
+            <v-row class="pt-0">
+              <v-col class="pb-0">
+                <v-text-field
+                    outlined
+                    rounded
+                    class="rounded-lg"
+                    v-model="formMasuk.jumlah"
+                    label="Jumlah Stok"
+                    required
+                    type="number"
+                >
+                  <template v-slot:prepend-inner>
+                    <v-icon class="mr-5">mdi-archive-outline</v-icon>
+                  </template>
+                </v-text-field>
+              </v-col>
+
+              <v-col class="pb-0">
+                <v-text-field
+                    outlined
+                    rounded
+                    class="rounded-lg"
+                    v-model="formMasuk.harga"
+                    label="Harga"
+                    required
+                    type="number"
+                >
+                  <template v-slot:prepend-inner>
+                    <v-icon class="mr-5">mdi-cash</v-icon>
+                    <span style="line-height: 1.375rem !important;">Rp. </span>
+                  </template>
+                </v-text-field>
+              </v-col>
+            </v-row>
+          </v-card-text>
+
+          <v-card-text v-else class="pt-7">
+            <v-row class="pt-0">
+              <v-col class="pb-0">
+                <v-text-field
+                    outlined
+                    rounded
+                    class="rounded-lg"
+                    v-model="formKeluar.jumlah"
+                    label="Jumlah Stok"
+                    required
+                    type="number"
+                >
+                  <template v-slot:prepend-inner>
+                    <v-icon class="mr-5">mdi-archive-outline</v-icon>
+                  </template>
+                </v-text-field>
+              </v-col>
+            </v-row>
+          </v-card-text>
+
+          <v-card-actions class="pr-8 pt-9 pb-5">
+            <v-spacer></v-spacer>
+            <v-btn color="grey darken-1" text @click="cancel" class=" pa-6 font-weight-bold">
+              Cancel
+            </v-btn>
+            <v-btn v-if="inputType==='Tambah Stok'" color="primary" elevation="0" @click="saveMasuk"
+                   class="ml-3 px-9 py-6 font-weight-bold"
+                   :loading="loading"
+                   :disabled="loading">
+              Save
+            </v-btn>
+            <v-btn v-else color="primary" elevation="0" @click="saveKeluar"
+                   class="ml-3 px-9 py-6 font-weight-bold"
+                   :loading="loading"
+                   :disabled="loading">
+              Save
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+
 <!--      snackbar section -->
       <v-snackbar v-if="typeof error_message==='object'" multi-line v-model="snackbar" light timeout="4000" right top >
         <v-icon class="mr-3" :color="color">
@@ -337,6 +504,35 @@ export default {
       unit: { required },
     }
   },
+  // validations() {
+  //   if ( this.inputType === 'Tambah') {
+  //     return {
+  //       form: {
+  //         nama_bahan: { required,  },
+  //         jumlah_stok: { required, numeric, minValue: minValue(0) },
+  //         // jumlah_per_sajian: { required, numeric, between (value) {
+  //         //     return between(0, this.jumlah_stok)(value)
+  //         //   }},
+  //         // jumlah_per_sajian: { required, numeric, between: between(0,'jumlah_stok')},
+  //         jumlah_per_sajian: { required, numeric, },
+  //         unit: { required },
+  //       }
+  //     }
+  //   }else if ( this.inputType === 'Tambah Stok') {
+  //     return {
+  //       formMasuk:{
+  //         jumlah: { required, numeric, minValue: minValue(0) },
+  //         harga: { required, numeric, },
+  //       }
+  //     }
+  //   } else {
+  //     return {
+  //       formKeluar: {
+  //         jumlah: {required, numeric, minValue: minValue(0)},
+  //       }
+  //     }
+  //   }
+  // },
 
   data() {
     return {
@@ -355,6 +551,7 @@ export default {
       search: null,
       switchDataKosong: false,
       dialog: false,
+      dialogStok : false,
       dialogConfirm: false,
       headers: [
         { text: "ID", value: "id_bahan", width:70 },
@@ -363,20 +560,34 @@ export default {
           value: "nama_bahan" },
         { text: "Jumlah Stok", value: "jumlah_stok",filterable: false},
         { text: "Serving Size", value: "jumlah_per_sajian",filterable: false},
-        { text: "Tersedia", value: "ketersediaan"},
+        { text: "Tersedia", value: "ketersediaan", filterable:false},
         // { text: "Unit", value: "unit", align: 'center', sortable: false, width:70},
         { value: 'actions', sortable: false },
       ],
       bahan: new FormData,
+      stokMasuk: new FormData,
+      stokKeluar: new FormData,
       bahans: [],
       bahanKosong: [],
       menus:[],
+      stokMasuks: [],
+      stokKeluars: [],
       form: {
         nama_bahan: '',
         jumlah_stok: null,
         jumlah_per_sajian: null,
         unit: '',
         ketersediaan: 0,
+      },
+      formKeluar: {
+        id_bahan: null,
+        jumlah: null,
+        status: '',
+      },
+      formMasuk: {
+        id_bahan: null,
+        jumlah: null,
+        harga: null,
       },
       editId: '',
       editedItem: {
@@ -423,6 +634,30 @@ export default {
       !this.$v.form.unit.required && errors.push('Unit harus diisi.')
       return errors
     },
+    // jumlahKeluarErrors () {
+    //   const errors = []
+    //   if (!this.$v.formKeluar.jumlah.$dirty) return errors
+    //   !this.$v.formKeluar.jumlah.required && errors.push('Jumlah stok harus diisi.')
+    //   !this.$v.formKeluar.jumlah.numeric && errors.push('Jumlah stok harus berupa angka.')
+    //   !this.$v.formKeluar.jumlah.minValue && errors.push('Jumlah stok minimal 0.')
+    //   return errors
+    // },
+    // jumlahMasukErrors () {
+    //   const errors = []
+    //
+    //   if (!this.$v.formMasuk.jumlah.$dirty) return errors
+    //   !this.$v.formMasuk.jumlah.required && errors.push('Jumlah stok harus diisi.')
+    //   !this.$v.formMasuk.jumlah.numeric && errors.push('Jumlah stok harus berupa angka.')
+    //   !this.$v.formMasuk.jumlah.minValue && errors.push('Jumlah stok minimal 0.')
+    //   return errors
+    // },
+    // hargaErrors () {
+    //   const errors = []
+    //   if (!this.$v.formMasuk.harga.$dirty) return errors
+    //   !this.$v.formMasuk.harga.required && errors.push('Serving size harus diisi.')
+    //   !this.$v.formMasuk.harga.numeric && errors.push('Serving size harus berupa angka.')
+    //   return errors
+    // },
   },
 
   methods: {
@@ -487,16 +722,131 @@ export default {
       })
     },
 
-    //read data product
-    readDataMenu() {
-      var url = this.$api + '/menu'
-      this.$http.get(url, {
+    //simpan data bahan
+    saveMasuk() {
+      this.loading = true
+      this.stokMasuk.append('id_bahan', this.formMasuk.id_bahan)
+      this.stokMasuk.append('jumlah', this.formMasuk.jumlah)
+      this.stokMasuk.append('harga', this.formMasuk.harga)
+
+      var url = this.$api + '/stokMasuk/'
+      this.$http.post(url, this.stokMasuk, {
         headers: {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
         }
       }).then(response => {
-        this.loadingData = false
-        this.menus = response.data.data
+        this.error_message=response.data.message;
+        console.log(this.error_message)
+        this.color="green"
+        this.iconSnackbar ='mdi-check-circle'
+        this.snackbar=true;
+        this.loading = false;
+        this.updateBahanDariStokMasuk()
+        this.readDataStokKeluar(); //mengambil data
+        this.readDataStokMasuk();
+        this.close();
+        this.resetForm();
+      }).catch(error => {
+        console.log(Object.values(error.response.data.message))
+        this.error_message=error.response.data.message;
+        console.log(typeof this.error_message)
+        this.color="red"
+        this.iconSnackbar ='mdi-alert-circle'
+        this.snackbar=true;
+        this.loading = false;
+      })
+    },
+
+    //simpan data bahan
+    saveKeluar() {
+      this.loading = true
+      this.stokKeluar.append('id_bahan', this.formKeluar.id_bahan)
+      this.stokKeluar.append('jumlah', this.formKeluar.jumlah)
+      this.stokKeluar.append('status', 'sisa')
+
+      var url = this.$api + '/stokKeluar/'
+      this.$http.post(url, this.stokKeluar, {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      }).then(response => {
+        this.error_message=response.data.message;
+        console.log(this.error_message)
+        this.color="green"
+        this.iconSnackbar ='mdi-check-circle'
+        this.snackbar=true;
+        this.loading = false;
+        this.updateBahanDariStokKeluar()
+        this.readDataStokKeluar(); //mengambil data
+        this.readDataStokMasuk();
+        this.close();
+        this.resetForm();
+      }).catch(error => {
+        console.log(Object.values(error.response.data.message))
+        this.error_message=error.response.data.message;
+        console.log(typeof this.error_message)
+        this.color="red"
+        this.iconSnackbar ='mdi-alert-circle'
+        this.snackbar=true;
+        this.loading = false;
+      })
+    },
+
+    updateBahanDariStokMasuk() {
+      let newData = {
+        jumlah_stok: this.formMasuk.jumlah
+      }
+      var url = this.$api + '/bahan/stokMasuk/' + this.formMasuk.id_bahan;
+
+      this.$http.put(url, newData, {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      }).then(response => {
+        this.error_message=response.data.message;
+        console.log(typeof this.error_message)
+        this.color="green"
+        this.iconSnackbar ='mdi-check-circle'
+        this.snackbar=true;
+        this.close();
+        this.readData(); //mengambil data
+
+      }).catch(error => {
+        console.log(error.response.data.message)
+        this.error_message=error.response.data.message;
+        this.color="red"
+        this.iconSnackbar ='mdi-alert-circle'
+        this.snackbar=true;
+        this.loading = false;
+      })
+    },
+
+    updateBahanDariStokKeluar() {
+      let newData = {
+        jumlah_stok: this.formKeluar.jumlah
+      }
+      var url = this.$api + '/bahan/stokKeluar/' + this.formKeluar.id_bahan;
+
+      this.$http.put(url, newData, {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      }).then(response => {
+        this.error_message=response.data.message;
+        console.log(typeof this.error_message)
+        this.color="green"
+        this.iconSnackbar ='mdi-check-circle'
+        this.snackbar=true;
+        this.close();
+        this.readData(); //mengambil data
+
+      }).catch(error => {
+        console.log(error.response.data.message)
+        this.error_message=error.response.data.message;
+        this.color="red"
+        this.iconSnackbar ='mdi-alert-circle'
+        this.snackbar=true;
+        this.loading = false;
       })
     },
 
@@ -506,10 +856,6 @@ export default {
       this.bahan.append('jumlah_stok', this.form.jumlah_stok);
       this.bahan.append('jumlah_per_sajian', this.form.jumlah_per_sajian);
       this.bahan.append('unit', this.form.unit);
-      if(this.form.jumlah_per_sajian>this.form.jumlah_stok)
-        this.bahan.append('ketersediaan', 0)
-      else
-        this.bahan.append('ketersediaan', 1)
 
       var url = this.$api + '/bahan/'
       this.$http.post(url, this.bahan, {
@@ -525,6 +871,7 @@ export default {
         this.loading = false;
         this.close();
         this.readData(); //mengambil data
+        this.readDataBahanKosong()
         this.resetForm();
       }).catch(error => {
         console.log(Object.values(error.response.data.message))
@@ -539,16 +886,11 @@ export default {
 
     //ubah data bahan
     update() {
-      if(this.form.jumlah_per_sajian>this.form.jumlah_stok)
-        this.form.ketersediaan=0
-      else
-        this.form.ketersediaan=1
       let newData = {
         nama_bahan: this.form.nama_bahan,
         jumlah_stok: this.form.jumlah_stok,
         jumlah_per_sajian: this.form.jumlah_per_sajian,
         unit: this.form.unit,
-        ketersediaan : this.form.ketersediaan
       }
       console.log(this.form.ketersediaan)
       var url = this.$api + '/bahan/' + this.editId;
@@ -566,6 +908,7 @@ export default {
         this.loading = false;
         this.close();
         this.readData(); //mengambil data
+        this.readDataBahanKosong()
         this.resetForm();
         this.inputType = 'Tambah';
 
@@ -579,53 +922,54 @@ export default {
     },
 
     //ubah data menu pas ganti jumlah bahan
-    updateMenu() {
-      let id_table= this.menus.find(menus => menus.id_bahan === this.form.id_bahan) //get id menu mana yang punya id_bahan yang sama
-      console.log(id_table.id_menu)
 
-      let newData = {
-        id_bahan: this.form.id_bahan,
-        nama_menu: this.form.nama_menu,
-        deskripsi: this.form.deskripsi,
-        unit: this.form.unit,
-        tipe_menu: this.form.tipe_menu,
-        harga: this.form.harga,
-        is_available: this.form.is_available,
-      }
-
-      if(id_table.jumlah_stok >= id_table.jumlah_per_sajian)
-      {
-        this.menu.append('is_available', 1);
-      }
-      else
-        this.menu.append('is_available', 0);
-
-      var url = this.$api + '/menu/' + this.editId;
-
-      this.$http.put(url, newData, {
-        headers: {
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
-        }
-      }).then(response => {
-        this.saveImage()
-        this.error_message=response.data.message;
-        this.color="green"
-        this.iconSnackbar ='mdi-check-circle-outline'
-        this.snackbar=true;
-        this.loading = false;
-        this.close();
-        this.readData(); //mengambil data
-        this.resetForm();
-        this.inputType = 'Tambah';
-
-      }).catch(error => {
-        this.error_message=error.response.data.message;
-        this.color="red"
-        this.iconSnackbar ='mdi-alert-circle-outline'
-        this.snackbar=true;
-        this.loading = false;
-      })
-    },
+    // updateMenu() {
+    //   let id_table= this.menus.find(menus => menus.id_bahan === this.form.id_bahan) //get id menu mana yang punya id_bahan yang sama
+    //   console.log(id_table.id_menu)
+    //
+    //   let newData = {
+    //     id_bahan: this.form.id_bahan,
+    //     nama_menu: this.form.nama_menu,
+    //     deskripsi: this.form.deskripsi,
+    //     unit: this.form.unit,
+    //     tipe_menu: this.form.tipe_menu,
+    //     harga: this.form.harga,
+    //     is_available: this.form.is_available,
+    //   }
+    //
+    //   if(id_table.jumlah_stok >= id_table.jumlah_per_sajian)
+    //   {
+    //     this.menu.append('is_available', 1);
+    //   }
+    //   else
+    //     this.menu.append('is_available', 0);
+    //
+    //   var url = this.$api + '/menu/' + this.editId;
+    //
+    //   this.$http.put(url, newData, {
+    //     headers: {
+    //       'Authorization': 'Bearer ' + localStorage.getItem('token')
+    //     }
+    //   }).then(response => {
+    //     this.saveImage()
+    //     this.error_message=response.data.message;
+    //     this.color="green"
+    //     this.iconSnackbar ='mdi-check-circle-outline'
+    //     this.snackbar=true;
+    //     this.loading = false;
+    //     this.close();
+    //     this.readData(); //mengambil data
+    //     this.resetForm();
+    //     this.inputType = 'Tambah';
+    //
+    //   }).catch(error => {
+    //     this.error_message=error.response.data.message;
+    //     this.color="red"
+    //     this.iconSnackbar ='mdi-alert-circle-outline'
+    //     this.snackbar=true;
+    //     this.loading = false;
+    //   })
+    // },
 
     //hapus data bahan
     deleteData() {
@@ -647,6 +991,7 @@ export default {
         this.close();
         this.readData(); //mengambil data
         this.resetForm();
+        this.readDataBahanKosong()
         this.dialogConfirm = false;
         this.inputType = 'Tambah';
       }).catch(error => {
@@ -675,10 +1020,27 @@ export default {
       this.dialog = true;
     },
 
+    stokMasukHandler(item){
+      this.inputType = 'Tambah Stok';
+      this.formMasuk.id_bahan = item.id_bahan
+      this.formMasuk.jumlah = item.jumlah
+      this.formMasuk.harga = item.harga
+      this.dialogStok = true;
+    },
+
+    stokKeluarHandler(item){
+      this.inputType = 'Buang Stok';
+      this.formKeluar.id_bahan = item.id_bahan
+      this.formKeluar.jumlah = item.jumlah
+      this.formKeluar.status = item.status
+      this.dialogStok = true;
+    },
+
     close() {
       this.$v.$reset()
       this.dialogConfirm = false
       this.dialog = false
+      this.dialogStok = false
       this.inputType = 'Tambah';
       this.form.nama_bahan = null //reset form.nama_bahan
     },
@@ -688,6 +1050,7 @@ export default {
       this.resetForm();
       this.readData();
       this.dialog = false;
+      this.dialogStok = false
       this.inputType = 'Tambah';
       this.form.nama_bahan = null //reset form.nama_bahan
     },
@@ -699,7 +1062,17 @@ export default {
         jumlah_stok: null,
         jumlah_per_sajian: null,
         unit: '',
-      };
+      }
+      this.formMasuk= {
+        id_bahan: null,
+        jumlah: null,
+        harga: null,
+      }
+      this.formKeluar= {
+        id_bahan: null,
+        jumlah: null,
+        status: '',
+      }
     },
   },
 
@@ -707,6 +1080,7 @@ export default {
     this.loadingData = true
     this.readData()
     this.readDataBahanKosong()
+    console.log(this.$v.formMasuk)
   },
 }
 </script>
