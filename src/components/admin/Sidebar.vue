@@ -178,6 +178,7 @@ export default {
         { title:"Bahan", href:"/bahan", icon:"mdi-food-steak"},
         { title:"Stok", href:"/stok", icon:"mdi-archive-outline" },
         { title:"Transaksi", href:"/transaksi", icon:"mdi-cart-outline" },
+        { title:"Kartu", href:"/kartu", icon:"mdi-credit-card-multiple-outline" },
         { title:"Laporan", href:"/laporan", icon:"mdi-file-chart-outline" },
       ],
       itemsOwner: [
@@ -198,6 +199,7 @@ export default {
         { title:"Dashboard", href:"/dashboard", icon:"mdi-view-dashboard-outline"},
         { title:"Meja", href:"/meja", icon:"mdi-table-chair" },
         { title:"Order", href:"/order", icon:"mdi-order-bool-ascending" },
+        { title:"Kartu", href:"/kartu", icon:"mdi-credit-card-multiple-outline" },
         { title:"Transaksi", href:"/transaksi", icon:"mdi-cart-outline" },
       ],
       itemsChef: [
@@ -212,6 +214,7 @@ export default {
         { title:"Menu", href:"/menu", icon:"mdi-room-service-outline" },
         { title:"Order", href:"/order", icon:"mdi-order-bool-ascending" },
         { title:"Reservasi", href:"/reservasi", icon:"mdi-book-account-outline" },
+        { title:"Kartu", href:"/kartu", icon:"mdi-credit-card-multiple-outline" },
         { title:"Transaksi", href:"/transaksi", icon:"mdi-cart-outline" },
       ],
       load: false,

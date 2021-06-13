@@ -125,12 +125,21 @@ const router = new VueRouter({
             }
           }),
         },
-        // {
-        //   path: "/order",
-        //   name: "order",
-        //   meta: {title: 'Order - AKB',owner:false, opsManager: false, waiter: false, kasir:false, chef:false},
-        //   component: importComponent('admin/view/Order'),
-        // },
+        {
+          path: "/order",
+          name: "order",
+          meta: {title: 'Order - AKB'},
+          component: importComponent('admin/view/Order'),
+          beforeEnter:((to,from,next)=>{
+            if(localStorage.getItem('role')==="Operasional Manager" || localStorage.getItem('role')==="Chef")
+              next()
+            else {
+              next({
+                path: '/dashboard',
+              })
+            }
+          }),
+        },
         {
           path: "/reservasi",
           name: "reservasi",
@@ -139,6 +148,21 @@ const router = new VueRouter({
           component: importComponent('admin/view/Reservasi'),
           beforeEnter:((to,from,next)=>{
             if(localStorage.getItem('role')==="Operasional Manager" || localStorage.getItem('role')==="Waiter" || localStorage.getItem('role')==="Waiter dan Kasir")
+              next()
+            else {
+              next({
+                path: '/dashboard',
+              })
+            }
+          }),
+        },
+        {
+          path: "/kartu",
+          name: "kartu",
+          meta: {title: 'Kartu - AKB'},
+          component: importComponent('admin/view/Kartu'),
+          beforeEnter:((to,from,next)=>{
+            if(localStorage.getItem('role')==="Operasional Manager" || localStorage.getItem('role')==="Kasir" || localStorage.getItem('role')==="Waiter dan Kasir")
               next()
             else {
               next({

@@ -40,12 +40,7 @@
               <span class="mr-3 font-weight-bold">Stok Masuk</span>
             </v-card-title>
 
-            <v-data-table :headers="headersMasuk" :items="stokMasuks" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." >
-              <template v-slot:item.nama_bahan="{ item }">
-                <span>
-                  {{ titleCase(item.nama_bahan) }}
-                </span>
-              </template>
+            <v-data-table v-if="filterTanggal===null" :headers="headersMasuk" :items="stokMasuks" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." >
 
               <template v-slot:item.jumlah="{ item }">
                 <span>
@@ -60,10 +55,10 @@
               </template>
             </v-data-table>
 
-            <v-data-table :headers="headersMasuk" :items="stokMasukFiltered" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." >
+            <v-data-table v-else :headers="headersMasuk" :items="stokMasukFiltered" :search="search" :loading="loadingData" loading-text="Data sedang dimuat..." >
 <!--              <template v-slot:item.nama_bahan="{ item }">-->
 <!--                <span>-->
-<!--                  {{ titleCase(item.nama_bahan) }}-->
+<!--                  {{ item.nama_bahan }} asdasdasd-->
 <!--                </span>-->
 <!--              </template>-->
 
@@ -86,7 +81,7 @@
           <v-card class="elevation-0 rounded-lg">
             <v-card-title class="mt-3 text-center">
               <v-text-field
-                  v-model="search"
+                  v-model="searchKeluar"
                   append-icon="mdi-magnify"
                   label="Search"
                   filled
@@ -100,12 +95,7 @@
               <span class="mr-3 font-weight-bold">Stok Keluar</span>
             </v-card-title>
 
-            <v-data-table :headers="headersKeluar" :items="stokKeluars" :search="search" :loading="loadingData" loading-text="Data sedang dimuat...">
-              <template v-slot:item.nama_bahan="{ item }">
-                <span>
-                  {{ titleCase(item.nama_bahan) }}
-                </span>
-              </template>
+            <v-data-table :headers="headersKeluar" :items="stokKeluars" :search="searchKeluar" :loading="loadingData" loading-text="Data sedang dimuat...">
 
               <template v-slot:item.jumlah="{ item }">
                 <span>
@@ -446,9 +436,11 @@ export default {
       color: '',
       iconSnackbar:'',
       search: null,
+      searchKeluar: null,
       dialog: false,
       dialogFilter: false,
       dialogConfirm: false,
+      isFilter:false,
       headersMasuk: [
         { text: "ID", value: "id_stok_masuk", width:70 },
         { text: "Nama Bahan",
@@ -464,7 +456,7 @@ export default {
           align: "start",
           value: "nama_bahan" },
         { text: "Stok", value: "jumlah",filterable: false,  width: 100},
-        { text: "Status", value: "status",filterable: false, sortable: false},
+        { text: "Status", value: "status", sortable: false},
         { text: "Tanggal", value: "created_at"}
       ],
       stokMasuks: [],
@@ -583,21 +575,22 @@ export default {
 
     // function buat format angka
     formatPrice(value) {
+      console.log()
       let val = (value/1).toFixed(0).replace('.', ',')
       return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
     },
 
     // function buat uppercase each word
-    titleCase(str) {
-      var splitStr = str.toLowerCase().split(' ');
-      for (var i = 0; i < splitStr.length; i++) {
-        // You do not need to check if i is larger than splitStr length, as your for does that for you
-        // Assign it back to the array
-        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
-      }
-      // Directly return the joined string
-      return splitStr.join(' ');
-    },
+    // titleCase(str) {
+    //   var splitStr = str.toLowerCase().split(' ');
+    //   for (var i = 0; i < splitStr.length; i++) {
+    //     // You do not need to check if i is larger than splitStr length, as your for does that for you
+    //     // Assign it back to the array
+    //     splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+    //   }
+    //   // Directly return the joined string
+    //   return splitStr.join(' ');
+    // },
 
     // submit form
     // setForm() {
@@ -680,7 +673,6 @@ export default {
           this.inputType = 'Tambah';
 
         }).catch(error => {
-          console.log(error.response.data.message)
           this.error_message=error.response.data.message;
           this.color="red"
           this.iconSnackbar ='mdi-alert-circle'

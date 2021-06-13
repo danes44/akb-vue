@@ -307,7 +307,7 @@
                 <v-card elevation="0">
                   <v-row class="pt-0 mt-0">
                     <v-col class="pb-0">
-                      <v-select
+                      <v-autocomplete
                           outlined
                           rounded
                           class="rounded-lg"
@@ -324,10 +324,10 @@
                         <template v-slot:prepend-inner>
                           <v-icon class="mr-5" >mdi-account-supervisor-outline</v-icon>
                         </template>
-                      </v-select>
+                      </v-autocomplete>
                     </v-col>
                     <v-col>
-                      <v-select
+                      <v-autocomplete
                           outlined
                           rounded
                           class="rounded-lg"
@@ -344,7 +344,7 @@
                         <template v-slot:prepend-inner>
                           <v-icon class="mr-5">mdi-account-group-outline</v-icon>
                         </template>
-                      </v-select>
+                      </v-autocomplete>
                     </v-col>
                   </v-row>
 
