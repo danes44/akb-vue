@@ -1,5 +1,7 @@
 # akb
-This repository is the front end of Atma Korean BBQ website
+This repository is the front end of Atma Korean BBQ website.
+Back End  : https://github.com/danes44/akb-api
+Mobile    : https://github.com/danes44/akb_mobile
 
 ## Project setup
 ```
