@@ -1,4 +1,5 @@
 # akb
+This repository is the front end of Atma Korean BBQ website
 
 ## Project setup
 ```
